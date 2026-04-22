@@ -177,7 +177,7 @@ export default function EisenhowerMatrix({ tarefas, onUpdate, onEditTask }) {
   return (
     <DragDropContext onDragEnd={onDragEnd}>
         <div style={{ 
-        display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', width: '100%', marginTop: '2rem'
+        display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', width: '100%', marginTop: '2rem'
         }}>
             <Quadrant title="Fazer Agora" desc="Alta prioridade. Impacto imediato." tasks={quadrante1} color="var(--priority-urgent)" />
             <Quadrant title="Agendar / Focar" desc="Média prioridade. Estratégico." tasks={quadrante2} color="var(--priority-medium)" />

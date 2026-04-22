@@ -10,7 +10,8 @@ import MeetingTimer from './MeetingTimer';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
     Filter, Home, CheckSquare, Layers, Settings, Plus, Calendar, Clock, 
-    Trash2, Edit3, Check, Save, Palette, Type, Mail, Lock, LogOut, BarChart2
+    Trash2, Edit3, Check, Save, Palette, Type, Mail, Lock, LogOut, BarChart2,
+    Menu, X
 } from 'lucide-react';
 import { 
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
@@ -20,9 +21,9 @@ import {
 /* --- COMPONENTES AUXILIARES --- */
 
 const StatBox = ({ title, value, color }) => (
-  <div className="glass-panel" style={{ padding: '2rem', flex: 1, minWidth: '200px', textAlign: 'center', borderTop: `4px solid ${color}` }}>
-    <h4 style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '0.8rem', fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase' }}>{title}</h4>
-    <span style={{ fontSize: '3.5rem', fontWeight: 700, color: 'var(--text-primary)' }}>{value}</span>
+  <div className="glass-panel" style={{ padding: '1.5rem', flex: 1, textAlign: 'center', borderTop: `4px solid ${color}` }}>
+    <h4 style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginBottom: '0.5rem', fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase' }}>{title}</h4>
+    <span className="stat-box-value" style={{ fontSize: '3rem', fontWeight: 700, color: 'var(--text-primary)', display: 'block' }}>{value}</span>
   </div>
 );
 
@@ -65,12 +66,12 @@ const DashboardView = ({ estatisticas, perfil, tarefas, categorias, loadData, se
 
     return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <header style={{ marginBottom: '2.5rem' }}>
-                <h1 style={{ fontSize: '2.4rem', fontWeight: 300, color: 'var(--text-primary)' }}>{getGreeting()}, <span style={{ fontWeight: 700 }}>{perfil?.nome.split(' ')[0]}</span>.</h1>
-                <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', marginTop: '0.5rem' }}>Status operacional da sua base.</p>
+            <header style={{ marginBottom: '2rem' }}>
+                <h1 style={{ fontSize: 'clamp(1.8rem, 5vw, 2.4rem)', fontWeight: 300, color: 'var(--text-primary)' }}>{getGreeting()}, <span style={{ fontWeight: 700 }}>{perfil?.nome.split(' ')[0]}</span>.</h1>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', marginTop: '0.5rem' }}>Status operacional da sua base.</p>
             </header>
 
-            <div style={{ display: 'flex', gap: '2rem', marginBottom: '3rem', flexWrap: 'wrap' }}>
+            <div className="stats-grid">
                 <StatBox title="Tarefas Totais" value={estatisticas.total || 0} color="var(--accent-color)" />
                 <StatBox title="Concluídas (7 dias)" value={estatisticas.concluidas7Dias || 0} color="var(--priority-medium)" />
                 <StatBox title="Concluídas Hoje" value={estatisticas.concluidasHoje || 0} color="var(--priority-low)" />
@@ -79,12 +80,25 @@ const DashboardView = ({ estatisticas, perfil, tarefas, categorias, loadData, se
 
 
 
-            <div style={{ display: 'flex', gap: '1.5rem', marginBottom: '2rem', alignItems: 'center', background: 'var(--glass-bg)', padding: '1rem 2rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--glass-border)' }}>
-                <Filter size={20} color="var(--text-secondary)" />
-                <input type="text" placeholder="Pesquisar tarefa ou tag..." value={filtroPesquisa} onChange={(e) => setFiltroPesquisa(e.target.value)} style={{ flex: 1, background: 'transparent', border: 'none', color: 'var(--text-primary)', fontSize: '1rem', outline: 'none' }} />
-                <div style={{ width: '1px', height: '30px', background: 'var(--glass-border)' }} />
-                <select value={filtroCategoria} onChange={(e) => setFiltroCategoria(e.target.value)} style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', outline: 'none', cursor: 'pointer' }}>
-                    <option value="todas">Categorias Globais</option>
+            <div style={{ 
+                display: 'flex', gap: '1rem', marginBottom: '2rem', alignItems: 'center', 
+                background: 'var(--glass-bg)', padding: '1rem', borderRadius: 'var(--radius-md)', 
+                border: '1px solid var(--glass-border)', flexWrap: 'wrap' 
+            }}>
+                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flex: '1 1 300px' }}>
+                    <Filter size={20} color="var(--text-secondary)" />
+                    <input 
+                        type="text" placeholder="Pesquisar..." value={filtroPesquisa} 
+                        onChange={(e) => setFiltroPesquisa(e.target.value)} 
+                        style={{ flex: 1, background: 'transparent', border: 'none', color: 'var(--text-primary)', fontSize: '1rem', outline: 'none' }} 
+                    />
+                </div>
+                <div className="desktop-only" style={{ width: '1px', height: '30px', background: 'var(--glass-border)' }} />
+                <select 
+                    value={filtroCategoria} onChange={(e) => setFiltroCategoria(e.target.value)} 
+                    style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', outline: 'none', cursor: 'pointer', flex: '1 1 150px' }}
+                >
+                    <option value="todas">Todas as Categorias</option>
                     {categorias.map(c => (
                         <option key={c.id} value={c.id}>{c.nome}</option>
                     ))}
@@ -119,8 +133,8 @@ const TasksView = ({ tarefas, onUpdate, onEdit }) => {
             <h2 style={{ marginBottom: '2rem', color: 'var(--text-primary)' }}>Minhas <span style={{ fontWeight: 700 }}>Tarefas</span></h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 {tarefas.sort((a,b) => b.id - a.id).map(t => (
-                    <div key={t.id} className="glass-panel" style={{ padding: '1.2rem 2rem', display: 'flex', alignItems: 'center', gap: '1.5rem', borderLeft: `6px solid ${getColor(t)}` }}>
-                        <div style={{ flex: 1 }}>
+                    <div key={t.id} className="glass-panel" style={{ padding: '1rem 1.5rem', display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: `6px solid ${getColor(t)}`, flexWrap: 'wrap' }}>
+                        <div style={{ flex: '1 1 200px' }}>
                             <h4 style={{ color: 'var(--text-primary)', marginBottom: '0.3rem', fontSize: '1.1rem' }}>{t.titulo}</h4>
                             <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
                                 <span style={{ fontSize: '0.75rem', fontWeight: 700, color: getColor(t), textTransform: 'uppercase', letterSpacing: '0.5px' }}>{getLabel(t)}</span>
@@ -184,7 +198,7 @@ const CategoriesView = ({ categorias, onUpdate }) => {
                             <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: c.cor }} />
                             <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{c.nome}</span>
                         </div>
-                        {![1,2,3,4].includes(c.id) && c.nome !== 'Reunião' && (
+                        {!['Casa', 'Estudos', 'Pessoal', 'Trabalho', 'Reunião'].includes(c.nome) && ![1, 2, 3, 4, 5].includes(c.id) && (
                             <button onClick={async () => { await deleteCategoria(c.id); onUpdate(); }} style={{ background: 'transparent', border: 'none', color: 'var(--priority-urgent)', cursor: 'pointer' }}><Trash2 size={18}/></button>
                         )}
                     </div>
@@ -342,7 +356,7 @@ const SettingsView = ({ perfil, onLogout }) => {
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             <h2 style={{ marginBottom: '2rem', color: 'var(--text-primary)' }}>Configurações do <span style={{ fontWeight: 700 }}>Sistema</span></h2>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '2rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem' }}>
                 {/* Aparência */}
                 <div className="glass-panel" style={{ padding: '2rem' }}>
                     <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}><Palette size={20}/> Personalização</h3>
@@ -449,6 +463,7 @@ export default function GlassDashboard({ onNavigateToProfile, onLogout }) {
 
   const [tarefaEditando, setTarefaEditando] = useState(null);
   const [isNewTaskModalOpen, setIsNewTaskModalOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const loadData = async () => {
     try {
@@ -490,27 +505,45 @@ export default function GlassDashboard({ onNavigateToProfile, onLogout }) {
   if (isInitialLoad) return <div style={{ color: 'var(--text-primary)', textAlign: 'center', marginTop: '10vh' }}>Iniciando Base...</div>;
 
   return (
-    <div style={{ display: 'flex', height: '100vh', width: '100vw', overflow: 'hidden' }}>
+    <div className="dashboard-container">
         
         {/* Modals */}
         {tarefaEditando && <TaskEditModal tarefa={tarefaEditando} categorias={categorias} onClose={() => setTarefaEditando(null)} onSave={handleSaveModal} />}
         {isNewTaskModalOpen && <TaskEditModal tarefa={{}} categorias={categorias} onClose={() => setIsNewTaskModalOpen(false)} onSave={handleSaveModal} />}
 
+        {/* Mobile Header */}
+        <div className="mobile-header">
+            <button onClick={() => setIsSidebarOpen(true)} style={{ background: 'transparent', border: 'none', color: 'var(--text-primary)', cursor: 'pointer' }}>
+                <Menu size={24} />
+            </button>
+            <h2 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'var(--accent-color)' }} />
+                Zen Grid
+            </h2>
+            <div style={{ width: 24 }} /> {/* Spacer */}
+        </div>
+
+        {/* Sidebar Overlay */}
+        <div className={`sidebar-overlay ${isSidebarOpen ? 'open' : ''}`} onClick={() => setIsSidebarOpen(false)} />
+
         {/* --- SIDEBAR --- */}
-        <aside className="glass-panel" style={{ width: '280px', borderRadius: 0, borderRight: '1px solid var(--glass-border)', display: 'flex', flexDirection: 'column', zIndex: 10 }}>
-            <div style={{ padding: '2.5rem 2rem' }}>
+        <aside className={`sidebar glass-panel ${isSidebarOpen ? 'open' : ''}`}>
+            <div style={{ padding: '2.5rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <h2 style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                     <div style={{ width: '14px', height: '14px', borderRadius: '50%', background: 'var(--accent-color)', boxShadow: '0 0 15px var(--accent-color)' }} />
                     Zen Grid
                 </h2>
+                <button className="mobile-only" onClick={() => setIsSidebarOpen(false)} style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'none' }}>
+                    <X size={24} />
+                </button>
             </div>
             
             <nav style={{ flex: 1, padding: '0 1.2rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                <SidebarItem icon={Home} label="Dashboard" active={activeView === 'dashboard'} onClick={() => setActiveView('dashboard')} />
-                <SidebarItem icon={CheckSquare} label="Minhas Tarefas" active={activeView === 'tasks'} onClick={() => setActiveView('tasks')} />
-                <SidebarItem icon={BarChart2} label="Gráficos" active={activeView === 'charts'} onClick={() => setActiveView('charts')} />
-                <SidebarItem icon={Layers} label="Categorias" active={activeView === 'categories'} onClick={() => setActiveView('categories')} />
-                <SidebarItem icon={Settings} label="Configurações" active={activeView === 'settings'} onClick={() => setActiveView('settings')} />
+                <SidebarItem icon={Home} label="Dashboard" active={activeView === 'dashboard'} onClick={() => { setActiveView('dashboard'); setIsSidebarOpen(false); }} />
+                <SidebarItem icon={CheckSquare} label="Minhas Tarefas" active={activeView === 'tasks'} onClick={() => { setActiveView('tasks'); setIsSidebarOpen(false); }} />
+                <SidebarItem icon={BarChart2} label="Gráficos" active={activeView === 'charts'} onClick={() => { setActiveView('charts'); setIsSidebarOpen(false); }} />
+                <SidebarItem icon={Layers} label="Categorias" active={activeView === 'categories'} onClick={() => { setActiveView('categories'); setIsSidebarOpen(false); }} />
+                <SidebarItem icon={Settings} label="Configurações" active={activeView === 'settings'} onClick={() => { setActiveView('settings'); setIsSidebarOpen(false); }} />
             </nav>
 
             <div style={{ padding: '1.5rem', borderTop: '1px solid var(--glass-border)' }}>
@@ -525,13 +558,13 @@ export default function GlassDashboard({ onNavigateToProfile, onLogout }) {
         </aside>
 
         {/* --- MAIN CONTENT --- */}
-        <main style={{ flex: 1, padding: '3.5rem', overflowY: 'auto' }}>
+        <main className="main-content">
             <AnimatePresence mode="wait">
                 {activeView === 'dashboard' && (
                     <DashboardView 
                         key="v-dash"
                         estatisticas={estatisticas} perfil={perfil} tarefas={tarefas} 
-                        categorias={categorias} // Passando categorias aqui
+                        categorias={categorias} 
                         loadData={loadData} setTarefaEditando={setTarefaEditando}
                         filtroPesquisa={filtroPesquisa} setFiltroPesquisa={setFiltroPesquisa}
                         filtroCategoria={filtroCategoria} setFiltroCategoria={setFiltroCategoria}
@@ -556,7 +589,7 @@ export default function GlassDashboard({ onNavigateToProfile, onLogout }) {
                 onClick={() => setIsNewTaskModalOpen(true)}
                 title="Nova Tarefa"
                 style={{
-                    position: 'fixed', bottom: '2.5rem', right: '2.5rem', width: '65px', height: '65px', borderRadius: '50%',
+                    position: 'fixed', bottom: '2rem', right: '2rem', width: '60px', height: '60px', borderRadius: '50%',
                     background: 'var(--accent-color)', color: '#fff', border: 'none', cursor: 'pointer',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     boxShadow: '0 15px 35px rgba(14, 165, 233, 0.4)', transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)', zIndex: 999

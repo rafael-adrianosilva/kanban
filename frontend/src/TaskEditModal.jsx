@@ -34,7 +34,7 @@ export default function TaskEditModal({ tarefa = {}, categorias = [], onClose, o
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         className="glass-panel" 
-        style={{ padding: '2rem', width: '100%', maxWidth: '500px', margin: '0 1rem' }}
+        style={{ padding: 'clamp(1.2rem, 5vw, 2rem)', width: '100%', maxWidth: '500px', margin: '0 1rem', maxHeight: '90vh', overflowY: 'auto' }}
       >
         <h2 style={{ marginBottom: '1.5rem', fontWeight: 300 }}>{isEditing ? 'Editar' : 'Nova'} <span style={{ fontWeight: 700 }}>Tarefa</span></h2>
         
@@ -54,10 +54,10 @@ export default function TaskEditModal({ tarefa = {}, categorias = [], onClose, o
             style={{ width: '100%', minHeight: '80px', fontFamily: 'inherit' }}
           />
           
-          <div style={{ display: 'flex', gap: '1rem' }}>
+          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
             <select 
               value={prioridade} onChange={(e) => setPrioridade(e.target.value)}
-              style={{ flex: 1 }}
+              style={{ flex: '1 1 120px' }}
             >
               <option value="urgente">Urgente</option>
               <option value="media">Média</option>
@@ -66,7 +66,7 @@ export default function TaskEditModal({ tarefa = {}, categorias = [], onClose, o
             
             <select 
               value={categoriaId} onChange={(e) => setCategoriaId(Number(e.target.value))}
-              style={{ flex: 1 }}
+              style={{ flex: '1 1 120px' }}
             >
               {categorias.map(c => (
                   <option key={c.id} value={c.id}>{c.nome}</option>
@@ -81,9 +81,9 @@ export default function TaskEditModal({ tarefa = {}, categorias = [], onClose, o
             style={{ width: '100%' }}
           />
 
-          <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-            <button type="button" onClick={onClose} style={{ flex: 1, background: 'transparent', border: '1px solid var(--glass-border)', color: 'var(--text-primary)', padding: '1rem', borderRadius: 'var(--radius-sm)', cursor: 'pointer' }}>Cancelar</button>
-            <button type="submit" style={{ flex: 1, background: 'var(--accent-color)', color: 'var(--text-inverse)', fontWeight: 600, padding: '1rem', borderRadius: 'var(--radius-sm)', border: 'none', cursor: 'pointer' }}>{isEditing ? 'Salvar Modificações' : 'Criar Tarefa'}</button>
+          <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', flexWrap: 'wrap' }}>
+            <button type="button" onClick={onClose} style={{ flex: '1 1 120px', background: 'transparent', border: '1px solid var(--glass-border)', color: 'var(--text-primary)', padding: '1rem', borderRadius: 'var(--radius-sm)', cursor: 'pointer' }}>Cancelar</button>
+            <button type="submit" style={{ flex: '1 1 120px', background: 'var(--accent-color)', color: 'var(--text-inverse)', fontWeight: 600, padding: '1rem', borderRadius: 'var(--radius-sm)', border: 'none', cursor: 'pointer' }}>{isEditing ? 'Salvar' : 'Criar'}</button>
           </div>
         </form>
       </motion.div>

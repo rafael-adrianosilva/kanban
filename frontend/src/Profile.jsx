@@ -82,7 +82,7 @@ export default function Profile({ onBackToDashboard, onLogout }) {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 className="glass-panel" 
-                style={{ padding: '3rem', textAlign: 'center', position: 'relative' }}
+                style={{ padding: 'clamp(1.5rem, 6vw, 3rem)', textAlign: 'center', position: 'relative' }}
             >
                 <button 
                     onClick={onBackToDashboard}

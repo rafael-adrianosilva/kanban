@@ -4,9 +4,9 @@ import { login, register } from './api';
 
 export default function LoginBoard({ onLoginSuccess }) {
   const [isLogin, setIsLogin] = useState(true);
-  const [nome, setNome] = useState('General');
-  const [email, setEmail] = useState('general@zengrid.com');
-  const [senha, setSenha] = useState('123456');
+   const [nome, setNome] = useState('');
+   const [email, setEmail] = useState('');
+   const [senha, setSenha] = useState('');
   const [erro, setErro] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -39,7 +39,7 @@ export default function LoginBoard({ onLoginSuccess }) {
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         className="glass-panel" 
-        style={{ padding: '3rem', width: '100%', maxWidth: '400px', textAlign: 'center' }}
+        style={{ padding: 'clamp(1.5rem, 8vw, 3rem)', width: '90%', maxWidth: '400px', textAlign: 'center' }}
       >
         <h1 style={{ marginBottom: '0.5rem', fontWeight: 300, letterSpacing: '2px' }}>ZEN <span style={{ fontWeight: 700 }}>GRID</span></h1>
         
