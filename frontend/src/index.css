@@ -1,0 +1,204 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+:root {
+  /* System Colors - Light/Vibrant Mesh Theme */
+  --bg-gradient-start: #f8fafc;
+  --bg-gradient-end: #e2e8f0;
+  --text-primary: #1e293b; /* Dark Slate for contrast on light glass */
+  --text-secondary: #475569;
+  --text-inverse: #ffffff; /* White text for buttons/badges */
+  
+  --accent-color: #0ea5e9; /* Crisp Cyan/Sky Blue */
+  --accent-hover: #0284c7;
+  
+  /* Status Colors */
+  --priority-urgent: #ef4444; /* Clean Red */
+  --priority-medium: #f59e0b; /* Amber */
+  --priority-low: #10b981; /* Emerald */
+  
+  /* Modern VisionOS Glassmorphism Tokens */
+  --glass-bg: rgba(255, 255, 255, 0.45); /* Lighter, frostier */
+  --glass-border: rgba(255, 255, 255, 0.7);
+  --glass-border-hover: rgba(255, 255, 255, 1);
+  --glass-blur: blur(40px); /* Extreme blur for density */
+  --glass-shadow: 0 10px 40px 0 rgba(31, 38, 135, 0.08); /* Softer, broader shadow */
+
+  /* Input Glass Tokens */
+  --input-bg: rgba(255, 255, 255, 0.6);
+  --input-border: rgba(255, 255, 255, 0.5);
+
+  /* Spacing & Shaping */
+  --radius-lg: 24px;
+  --radius-md: 16px;
+  --radius-sm: 12px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--bg-gradient-end); /* Fallback */
+  color: var(--text-primary);
+  min-height: 100vh;
+  margin: 0;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Typography Overrides for Light Theme */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-primary);
+}
+
+/* Base Glassmorphism utility */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  border-radius: var(--radius-lg);
+  transition: border 0.3s ease, box-shadow 0.3s ease, transform 0.3s background 0.3s;
+}
+
+.glass-panel:hover {
+  border: 1px solid var(--glass-border-hover);
+  box-shadow: 0 12px 48px 0 rgba(31, 38, 135, 0.12);
+}
+
+/* Specific Task Hover - Bouncing Squircle */
+.task-card {
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.55);
+}
+.task-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  background: rgba(255, 255, 255, 0.7);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Custom Scrollbar for Light Glass UI */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(255,255,255,0.2); 
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.15); 
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0,0,0,0.3); 
+}
+
+/* Inputs, Selects, Textareas form styling */
+input, textarea, select {
+    background: var(--input-bg) !important;
+    border: 1px solid var(--input-border) !important;
+    color: var(--text-primary) !important;
+    padding: 1rem;
+    border-radius: var(--radius-sm);
+    outline: none;
+    transition: all 0.3s ease;
+    font-family: inherit;
+}
+
+input::placeholder, textarea::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.7;
+}
+
+input:focus, textarea:focus, select:focus {
+    border-color: var(--accent-color) !important;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2) !important;
+    background: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* General Action Buttons */
+button {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+button:active {
+  transform: scale(0.96);
+}
+
+/* Floating Background Orbs styles */
+.mesh-bg {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  z-index: -1;
+  overflow: hidden;
+  background: #f1f5f9; /* Base color */
+}
+
+/* Avoid Purple - Using Cyan, Pink, Emerald, Yellow */
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.6;
+  animation: floatOrb 20s infinite alternate ease-in-out;
+}
+
+.orb-1 { width: 600px; height: 600px; background: #00f2fe; top: -10%; left: -10%; animation-delay: 0s; }
+.orb-2 { width: 500px; height: 500px; background: #ff0844; bottom: -5%; right: -5%; animation-delay: -5s; }
+.orb-3 { width: 450px; height: 450px; background: #10b981; top: 40%; left: 30%; animation-delay: -10s; }
+.orb-4 { width: 550px; height: 550px; background: #fbbf24; top: -20%; right: 20%; animation-delay: -15s; }
+
+@keyframes floatOrb {
+  0% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(50px, -50px) scale(1.1); }
+  66% { transform: translate(-30px, 60px) scale(0.9); }
+  100% { transform: translate(20px, 20px) scale(1.05); }
+}
+
+/* Theme Overrides */
+body.theme-dark {
+  --bg-gradient-start: #0f172a;
+  --bg-gradient-end: #020617;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --glass-bg: rgba(15, 23, 42, 0.45);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --input-bg: rgba(15, 23, 42, 0.6);
+  --input-border: rgba(255, 255, 255, 0.2);
+}
+body.theme-dark .mesh-bg { background: #020617; }
+body.theme-dark .orb-1 { background: #3b82f6; }
+body.theme-dark .orb-2 { background: #8b5cf6; }
+body.theme-dark .orb-3 { background: #06b6d4; }
+body.theme-dark .orb-4 { background: #6366f1; }
+body.theme-dark .task-card { background: rgba(30,30,40, 0.55); border-color: rgba(255,255,255,0.05); }
+body.theme-dark .task-card:hover { background: rgba(40,40,50, 0.7); }
+
+body.theme-nature .mesh-bg { background: #ecfdf5; }
+body.theme-nature .orb-1 { background: #059669; }
+body.theme-nature .orb-2 { background: #34d399; }
+body.theme-nature .orb-3 { background: #a7f3d0; }
+body.theme-nature .orb-4 { background: #10b981; }
+
+body.theme-sakura .mesh-bg { background: #fdf2f8; }
+body.theme-sakura .orb-1 { background: #f472b6; }
+body.theme-sakura .orb-2 { background: #fb7185; }
+body.theme-sakura .orb-3 { background: #fbcfe8; }
+body.theme-sakura .orb-4 { background: #fda4af; }
+
+/* Font Overrides */
+body.font-arial { font-family: Arial, Helvetica, sans-serif; }
+body.font-sans { font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; }
+body.font-outfit { font-family: 'Outfit', sans-serif; }
