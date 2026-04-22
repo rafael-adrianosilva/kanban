@@ -1,13 +1,26 @@
 {
-    "experimentalServices": {
-        "frontend": {
-            "entrypoint": "frontend",
-            "routePrefix": "/",
-            "framework": "vite"
-        },
-        "backend": {
-            "entrypoint": "backend",
-            "routePrefix": "/_/backend"
-        }
+  "version": 2,
+  "functions": {
+    "backend/server.js": {
+      "maxDuration": 10
     }
+  },
+  "rewrites": [
+    {
+      "source": "/auth/(.*)",
+      "destination": "/backend/server.js"
+    },
+    {
+      "source": "/tarefas(.*)",
+      "destination": "/backend/server.js"
+    },
+    {
+      "source": "/categorias(.*)",
+      "destination": "/backend/server.js"
+    },
+    {
+      "source": "/estatisticas(.*)",
+      "destination": "/backend/server.js"
+    }
+  ]
 }
