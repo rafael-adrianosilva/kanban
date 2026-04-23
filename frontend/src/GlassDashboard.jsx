@@ -59,7 +59,7 @@ const DashboardView = ({ estatisticas, perfil, tarefas, categorias, loadData, se
     };
 
     const tarefasFiltradas = tarefas.filter(t => {
-        const matchCategoria = filtroCategoria === 'todas' || t.categoria_id === Number(filtroCategoria);
+        const matchCategoria = filtroCategoria === 'todas' || String(t.categoria_id) === String(filtroCategoria);
         const matchTermo = t.titulo.toLowerCase().includes(filtroPesquisa.toLowerCase()) || (t.tags && t.tags.some(tg => tg.toLowerCase().includes(filtroPesquisa.toLowerCase())));
         return matchCategoria && matchTermo;
     });
@@ -529,7 +529,18 @@ export default function GlassDashboard({ onNavigateToProfile, onLogout }) {
           getEstatisticas(), getTarefas(), getMe(), getCategorias() 
       ]);
       setEstatisticas(stats); 
-      setTarefas(tasks); 
+      
+      // Enriquecer tarefas com informações da categoria (nome e cor) para que o MeetingTimer funcione
+      const enrichedTasks = (tasks || []).map(t => {
+          const cat = cats.find(c => String(c.id) === String(t.categoria_id));
+          return {
+              ...t,
+              categoria_nome: cat ? cat.nome : t.categoria_nome,
+              categoria_cor: cat ? cat.cor : t.categoria_cor
+          };
+      });
+
+      setTarefas(enrichedTasks); 
       setPerfil(dataPerfil);
       setCategorias(cats);
     } catch (e) { 
