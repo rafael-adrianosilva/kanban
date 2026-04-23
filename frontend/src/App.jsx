@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import LavaLamp from './LavaLamp';
 import LoginBoard from './LoginBoard';
 import GlassDashboard from './GlassDashboard';
 import Profile from './Profile';
@@ -30,13 +31,7 @@ function App() {
 
   return (
     <>
-      {/* Mesh Background Orbs */}
-      <div className="mesh-bg">
-        <div className="orb orb-1"></div>
-        <div className="orb orb-2"></div>
-        <div className="orb orb-3"></div>
-        <div className="orb orb-4"></div>
-      </div>
+      <LavaLamp />
 
       {isAuthenticated ? (
         <div className="animate-fade-in">
