@@ -169,12 +169,22 @@ app.put('/auth/me/senha', autenticarToken, async (req, res) => {
 
 /* --- ENDPOINTS RESTful TAREFAS/CATEGORIAS --- */
 
-app.get('/categorias', async (req, res) => {
+app.get('/categorias', autenticarToken, async (req, res) => {
     try {
-        const snapshot = await db.collection('categorias').orderBy('nome', 'asc').get();
-        const categorias = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        res.status(200).json(categorias);
+        // Buscar categorias do usuário + categorias do sistema (sem usuario_id)
+        const snapshotUser = await db.collection('categorias').where('usuario_id', '==', req.usuarioId).get();
+        const snapshotSystem = await db.collection('categorias').where('usuario_id', '==', null).get();
+        
+        const categoriasUser = snapshotUser.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const categoriasSystem = snapshotSystem.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        
+        // Unir e ordenar
+        const todas = [...categoriasSystem, ...categoriasUser];
+        todas.sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
+        
+        res.status(200).json(todas);
     } catch (error) {
+        console.error(error);
         res.status(500).json({ erro: 'Erro ao buscar categorias' });
     }
 });
@@ -184,10 +194,20 @@ app.post('/categorias', autenticarToken, async (req, res) => {
     if (!nome || !cor) return res.status(400).json({ erro: 'Nome e Cor são obrigatórios' });
 
     try {
-        const snapshot = await db.collection('categorias').where('nome', '==', nome).get();
-        if (!snapshot.empty) return res.status(400).json({ erro: 'Categoria já existe' });
+        // Verificar se categoria com mesmo nome já existe para ESTE usuário
+        const snapshot = await db.collection('categorias')
+            .where('usuario_id', '==', req.usuarioId)
+            .where('nome', '==', nome)
+            .get();
+            
+        if (!snapshot.empty) return res.status(400).json({ erro: 'Você já tem uma categoria com esse nome' });
 
-        const docRef = await db.collection('categorias').add({ nome, cor });
+        const docRef = await db.collection('categorias').add({ 
+            nome, 
+            cor, 
+            usuario_id: req.usuarioId,
+            criado_em: new Date().toISOString()
+        });
         res.status(201).json({ id: docRef.id, nome, cor });
     } catch (error) {
         res.status(500).json({ erro: 'Erro ao criar categoria' });
@@ -195,11 +215,25 @@ app.post('/categorias', autenticarToken, async (req, res) => {
 });
 
 app.delete('/categorias/:id', autenticarToken, async (req, res) => {
-    const defaultIds = ['1', '2', '3', '4', '5']; // Firestore IDs são strings
-    if (defaultIds.includes(req.params.id)) return res.status(403).json({ erro: 'Categoria de sistema, inalterável.' });
-
     try {
-        await db.collection('categorias').doc(req.params.id).delete();
+        const docRef = db.collection('categorias').doc(req.params.id);
+        const doc = await docRef.get();
+        
+        if (!doc.exists) return res.status(404).json({ erro: 'Categoria não encontrada' });
+        
+        const data = doc.data();
+        
+        // Impedir deletar categorias de sistema (sem usuario_id)
+        if (!data.usuario_id) {
+            return res.status(403).json({ erro: 'Categoria de sistema não pode ser removida.' });
+        }
+        
+        // Verificar se pertence ao usuário
+        if (data.usuario_id !== req.usuarioId) {
+            return res.status(403).json({ erro: 'Você não tem permissão para deletar esta categoria.' });
+        }
+
+        await docRef.delete();
         res.status(204).send();
     } catch (error) {
         res.status(500).json({ erro: 'Falha ao deletar categoria' });

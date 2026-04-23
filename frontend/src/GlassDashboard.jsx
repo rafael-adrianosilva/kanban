@@ -230,16 +230,16 @@ const CategoriesView = ({ categorias, setCategorias, onUpdate, loadCategories, s
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1.5rem' }}>
                 {categorias.map(c => (
-                    <div key={c.id} className="glass-panel-lite" style={{ padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', opacity: c.temp ? 0.6 : 1 }}>
+                    <div key={c.id} className="glass-panel-lite" style={{ padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', opacity: c.temp ? 0.6 : 1, minWidth: 0 }}>
                         <div 
-                            style={{ display: 'flex', alignItems: 'center', gap: '1rem', cursor: 'pointer', flex: 1 }}
+                            style={{ display: 'flex', alignItems: 'center', gap: '1rem', cursor: 'pointer', flex: 1, minWidth: 0 }}
                             onClick={() => {
                                 setFiltroCategoria(c.id);
                                 setActiveView('dashboard');
                             }}
                         >
-                            <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: c.cor }} />
-                            <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{c.nome}</span>
+                            <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: c.cor, flexShrink: 0 }} />
+                            <span className="category-label" style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{c.nome}</span>
                         </div>
                         {!['Casa', 'Estudos', 'Pessoal', 'Trabalho', 'Reunião'].includes(c.nome) && ![1, 2, 3, 4, 5].includes(c.id) && (
                             <button 

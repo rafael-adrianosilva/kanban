@@ -463,3 +463,12 @@ img {
     display: none !important;
   }
 }
+
+/* Category Label Overflow Fix */
+.category-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-block;
+  max-width: 100%;
+}

@@ -64,8 +64,8 @@ const TaskCardVisual = React.forwardRef(({ tarefa, index, onUpdate, onEdit, prov
 
           {/* Categoria e Tags abaixo do nome */}
           <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center', marginBottom: '0.6rem' }}>
-            {tarefa.categoria_nome && (
-                <span style={{ background: tarefa.categoria_cor, color: 'var(--text-inverse)', padding: '3px 8px', borderRadius: '12px', fontSize: '0.7rem', fontWeight: 600 }}>
+              {tarefa.categoria_nome && (
+                <span className="category-label" style={{ background: tarefa.categoria_cor, color: 'var(--text-inverse)', padding: '3px 8px', borderRadius: '12px', fontSize: '0.7rem', fontWeight: 600, maxWidth: '120px' }}>
                     {tarefa.categoria_nome}
                 </span>
             )}
