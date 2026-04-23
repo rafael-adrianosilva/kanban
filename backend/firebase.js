@@ -1,24 +1,33 @@
 const admin = require('firebase-admin');
-const path = require('path');
 
-// Tenta carregar as credenciais da variável de ambiente (Vercel) ou do arquivo local
 let serviceAccount;
 
 if (process.env.FIREBASE_SERVICE_ACCOUNT) {
-  serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-} else {
-  // Fallback para desenvolvimento local
   try {
+    serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+  } catch (e) {
+    console.error("Erro ao parsear FIREBASE_SERVICE_ACCOUNT:", e.message);
+  }
+} else {
+  try {
+    // Fallback local
     serviceAccount = require('./serviceAccountKey.json');
   } catch (e) {
-    console.error("Aviso: serviceAccountKey.json não encontrado. Certifique-se de configurar a variável FIREBASE_SERVICE_ACCOUNT no Vercel.");
+    // Apenas avisa, não quebra o build
   }
 }
 
-if (serviceAccount) {
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount)
-  });
+if (!admin.apps.length) {
+  if (serviceAccount) {
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount)
+    });
+    console.log("Firebase Admin inicializado com Service Account.");
+  } else {
+    // No Vercel, isso causará o erro 16 UNAUTHENTICATED se tentar usar o db
+    console.error("CRITICAL: Nenhuma credencial do Firebase encontrada! Configure FIREBASE_SERVICE_ACCOUNT no Vercel.");
+    admin.initializeApp(); // Tenta usar default credentials
+  }
 }
 
 const db = admin.firestore();
