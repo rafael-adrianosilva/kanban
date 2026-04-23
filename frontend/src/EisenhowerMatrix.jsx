@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { updateTarefa, deleteTarefa } from './api';
-import { Check, Trash2, Edit3, Move, ArrowRight } from 'lucide-react';
+import { Check, Trash2, Edit3, Move, ArrowRight, Clock } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import MeetingTimer from './MeetingTimer';
 
