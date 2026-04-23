@@ -247,31 +247,21 @@ app.put('/auth/me/senha', autenticarToken, async (req, res) => {
 
 app.get('/categorias', autenticarToken, async (req, res) => {
     try {
-        const userDoc = await db.collection('usuarios').doc(req.usuarioId).get();
-        if (!userDoc.exists) return res.status(404).json({ erro: 'Usuário não encontrado' });
-        const userEmail = userDoc.data()?.email;
-        if (!userEmail) return res.status(400).json({ erro: 'E-mail do usuário não encontrado' });
-
-        // Buscar categorias do usuário + categorias do sistema + categorias onde é colaborador
+        // Buscar categorias do usuário + categorias do sistema (sem usuario_id)
         const snapshotUser = await db.collection('categorias').where('usuario_id', '==', req.usuarioId).get();
         const snapshotSystem = await db.collection('categorias').where('usuario_id', '==', null).get();
-        const snapshotShared = await db.collection('categorias').where('colaboradores', 'array_contains', userEmail).get();
         
         const categoriasUser = snapshotUser.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         const categoriasSystem = snapshotSystem.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        const categoriasShared = snapshotShared.docs.map(doc => ({ id: doc.id, ...doc.data(), shared: true }));
         
-        // Unir e remover duplicatas (caso o usuário seja dono e também esteja na lista de colaboradores por erro)
-        const map = new Map();
-        [...categoriasSystem, ...categoriasUser, ...categoriasShared].forEach(c => map.set(c.id, c));
-        const todas = Array.from(map.values());
-        
+        // Unir e ordenar
+        const todas = [...categoriasSystem, ...categoriasUser];
         todas.sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
         
         res.status(200).json(todas);
     } catch (error) {
-        console.error('Erro em GET /categorias:', error);
-        res.status(500).json({ erro: 'Erro ao buscar categorias', detalhes: error.message });
+        console.error(error);
+        res.status(500).json({ erro: 'Erro ao buscar categorias' });
     }
 });
 
@@ -292,7 +282,6 @@ app.post('/categorias', autenticarToken, async (req, res) => {
             nome, 
             cor, 
             usuario_id: req.usuarioId,
-            colaboradores: [], // Inicializa lista de colaboradores vazia
             criado_em: new Date().toISOString()
         });
         res.status(201).json({ id: docRef.id, nome, cor });
@@ -327,77 +316,29 @@ app.delete('/categorias/:id', autenticarToken, async (req, res) => {
     }
 });
 
-app.post('/categorias/:id/compartilhar', autenticarToken, async (req, res) => {
-    const { email } = req.body;
-    if (!email) return res.status(400).json({ erro: 'E-mail é obrigatório' });
-
-    try {
-        const docRef = db.collection('categorias').doc(req.params.id);
-        const doc = await docRef.get();
-        
-        if (!doc.exists) return res.status(404).json({ erro: 'Categoria não encontrada' });
-        
-        const data = doc.data();
-        if (data.usuario_id !== req.usuarioId) {
-            return res.status(403).json({ erro: 'Apenas o proprietário pode compartilhar esta categoria.' });
-        }
-
-        const colaboradores = data.colaboradores || [];
-        if (colaboradores.includes(email)) {
-            return res.status(400).json({ erro: 'Este usuário já é um colaborador.' });
-        }
-
-        colaboradores.push(email);
-        await docRef.update({ colaboradores });
-        
-        res.status(200).json({ mensagem: 'Categoria compartilhada com sucesso!', colaboradores });
-    } catch (error) {
-        res.status(500).json({ erro: 'Erro ao compartilhar categoria' });
-    }
-});
-
 app.get('/tarefas', autenticarToken, async (req, res) => {
     const status = req.query.status;
-    const agora = new Date().toISOString();
     try {
-        // Buscar tarefas próprias
-        const snapshotProprias = await db.collection('tarefas').where('usuario_id', '==', req.usuarioId).get();
-        
-        // Buscar categorias onde o usuário é colaborador para pegar as tarefas delas
-        const userDoc = await db.collection('usuarios').doc(req.usuarioId).get();
-        if (!userDoc.exists) return res.status(404).json({ erro: 'Usuário não encontrado no banco' });
-        const userEmail = userDoc.data()?.email;
-        if (!userEmail) return res.status(400).json({ erro: 'E-mail do usuário não identificado' });
-        const snapshotSharedCats = await db.collection('categorias').where('colaboradores', 'array_contains', userEmail).get();
-        const sharedCatIds = snapshotSharedCats.docs.map(doc => doc.id);
-
-        let tarefas = snapshotProprias.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-        // Se houver categorias compartilhadas, buscar tarefas delas que não sejam as próprias
-        if (sharedCatIds.length > 0) {
-            const snapshotSharedTarefas = await db.collection('tarefas').where('categoria_id', 'in', sharedCatIds).get();
-            const tarefasShared = snapshotSharedTarefas.docs
-                .map(doc => ({ id: doc.id, ...doc.data() }))
-                .filter(t => t.usuario_id !== req.usuarioId); // Evitar duplicatas se o usuário moveu sua tarefa para lá
-            tarefas = [...tarefas, ...tarefasShared];
-        }
-
+        let query = db.collection('tarefas').where('usuario_id', '==', req.usuarioId);
         
         if (status) {
-            tarefas = tarefas.filter(t => t.status === status);
+            query = query.where('status', '==', status);
         }
         
-        // Ordenar manualmente
+        const snapshot = await query.get();
+        const tarefas = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        
+        // Ordenar manualmente (Firestore tem limitações com índices compostos dinâmicos sem configuração prévia)
         tarefas.sort((a, b) => {
             if (a.data_limite < b.data_limite) return -1;
             if (a.data_limite > b.data_limite) return 1;
-            return (b.criado_em || '').localeCompare(a.criado_em || '');
+            return b.criado_em.localeCompare(a.criado_em);
         });
 
         res.status(200).json(tarefas);
     } catch (error) {
-        console.error('Erro em GET /tarefas:', error);
-        res.status(500).json({ erro: 'Erro ao buscar tarefas', detalhes: error.message });
+        console.error(error);
+        res.status(500).json({ erro: 'Erro ao buscar tarefas' });
     }
 });
 
@@ -467,9 +408,6 @@ app.post('/tarefas', autenticarToken, async (req, res) => {
     if (!titulo) return res.status(400).json({ erro: 'Título é obrigatório' });
 
     try {
-        const userDoc = await db.collection('usuarios').doc(req.usuarioId).get();
-        const userName = userDoc.data()?.nome || 'Usuário';
-
         const novaTarefa = {
             usuario_id: req.usuarioId,
             titulo,
@@ -479,13 +417,11 @@ app.post('/tarefas', autenticarToken, async (req, res) => {
             categoria_id: categoria_id || '1',
             status: 'pendente',
             criado_em: new Date().toISOString(),
-            criado_por_nome: userName,
-            editado_por_nome: userName,
             tags: tags || []
         };
 
         const docRef = await db.collection('tarefas').add(novaTarefa);
-        res.status(201).json({ id: docRef.id, titulo, criado_por_nome: userName });
+        res.status(201).json({ id: docRef.id, titulo });
     } catch (error) {
         res.status(500).json({ erro: 'Erro ao criar a tarefa' });
     }
@@ -499,29 +435,11 @@ app.put('/tarefas/:id', autenticarToken, async (req, res) => {
         const tarefaRef = db.collection('tarefas').doc(id);
         const doc = await tarefaRef.get();
         
-        if (!doc.exists) {
+        if (!doc.exists || doc.data().usuario_id !== req.usuarioId) {
             return res.status(404).json({ erro: 'Tarefa não encontrada' });
         }
 
-        const tarefaData = doc.data();
-        
-        // Verificar permissão: dono ou colaborador da categoria
-        const userDoc = await db.collection('usuarios').doc(req.usuarioId).get();
-        const userData = userDoc.data();
-        const userEmail = userData?.email;
-
-        const catDoc = await db.collection('categorias').doc(tarefaData.categoria_id).get();
-        const catData = catDoc.exists ? catDoc.data() : {};
-        const isColaborador = catData.colaboradores && catData.colaboradores.includes(userEmail);
-
-        if (tarefaData.usuario_id !== req.usuarioId && !isColaborador) {
-            return res.status(403).json({ erro: 'Você não tem permissão para editar esta tarefa.' });
-        }
-
-        let updateData = {
-            editado_por_nome: userData?.nome || 'Usuário'
-        };
-        
+        let updateData = {};
         if (titulo !== undefined) updateData.titulo = titulo;
         if (descricao !== undefined) updateData.descricao = descricao;
         if (data_limite !== undefined) updateData.data_limite = data_limite;
@@ -539,9 +457,8 @@ app.put('/tarefas/:id', autenticarToken, async (req, res) => {
         }
 
         await tarefaRef.update(updateData);
-        res.status(200).json({ mensagem: 'Tarefa atualizada', editado_por_nome: updateData.editado_por_nome });
+        res.status(200).json({ mensagem: 'Tarefa atualizada' });
     } catch (error) {
-        console.error(error);
         res.status(500).json({ erro: 'Erro ao atualizar a tarefa' });
     }
 });

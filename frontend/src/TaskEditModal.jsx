@@ -13,7 +13,6 @@ export default function TaskEditModal({ tarefa = {}, categorias = [], onClose, o
   const handleSave = (e) => {
     e.preventDefault();
     const tagsArray = tagsInput.split(',').map(t => t.trim()).filter(Boolean);
-    
     onSave({
       id: tarefa.id,
       titulo,
@@ -40,69 +39,35 @@ export default function TaskEditModal({ tarefa = {}, categorias = [], onClose, o
         <h2 style={{ marginBottom: '1.5rem', fontWeight: 300 }}>{isEditing ? 'Editar' : 'Nova'} <span style={{ fontWeight: 700 }}>Tarefa</span></h2>
         
         <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <div style={{ position: 'relative' }}>
-            <label style={{ display: 'block', marginBottom: '0.4rem', color: 'var(--text-secondary)', fontSize: '0.75rem' }}>
-              Título <span style={{ color: '#ef4444' }}>*</span>
-            </label>
-            <input 
-              type="text" placeholder="O que precisa ser feito?" value={titulo} 
-              onChange={(e) => setTitulo(e.target.value)} required
-              style={{ 
-                width: '100%', padding: '0.75rem', borderRadius: '10px', 
-                border: '1px solid var(--glass-border)', background: 'rgba(15, 23, 42, 0.7)', 
-                color: '#ffffff', outline: 'none', transition: 'all 0.3s'
-              }}
-            />
-          </div>
+          <input 
+            type="text" placeholder="Título" value={titulo} onChange={(e) => setTitulo(e.target.value)} required
+            style={{ width: '100%' }}
+          />
 
-          <div style={{ position: 'relative' }}>
-            <label style={{ display: 'block', marginBottom: '0.4rem', color: 'var(--text-secondary)', fontSize: '0.75rem' }}>
-              Data Limite <span style={{ color: '#ef4444' }}>*</span>
-            </label>
-            <input 
-              type="datetime-local" value={dataLimite} 
-              onChange={(e) => setDataLimite(e.target.value)}
-              required
-              style={{ 
-                width: '100%', padding: '0.75rem', borderRadius: '10px', 
-                border: '1px solid var(--glass-border)', background: 'rgba(15, 23, 42, 0.7)', 
-                color: '#ffffff', outline: 'none', transition: 'all 0.3s'
-              }}
-            />
-          </div>
+          <input 
+            type="datetime-local" value={dataLimite} onChange={(e) => setDataLimite(e.target.value)}
+            style={{ width: '100%' }}
+          />
           
           <textarea 
-            placeholder="Adicione detalhes extras..." value={descricao} 
-            onChange={(e) => setDescricao(e.target.value)}
-            style={{ 
-              width: '100%', minHeight: '100px', padding: '0.75rem', borderRadius: '10px',
-              border: '1px solid var(--glass-border)', background: 'rgba(15, 23, 42, 0.7)',
-              color: '#ffffff', outline: 'none', fontFamily: 'inherit', resize: 'vertical'
-            }}
+            placeholder="Descrição da Tarefa..." value={descricao} onChange={(e) => setDescricao(e.target.value)}
+            style={{ width: '100%', minHeight: '80px', fontFamily: 'inherit' }}
           />
           
           <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-             <select 
-               value={prioridade} onChange={(e) => setPrioridade(e.target.value)}
-               style={{ 
-                 flex: '1 1 120px', padding: '0.6rem', 
-                 background: 'rgba(15, 23, 42, 0.7)', color: '#ffffff',
-                 border: '1px solid var(--glass-border)', borderRadius: '10px', outline: 'none'
-               }}
-             >
+            <select 
+              value={prioridade} onChange={(e) => setPrioridade(e.target.value)}
+              style={{ flex: '1 1 120px' }}
+            >
               <option value="urgente">Urgente</option>
               <option value="media">Média</option>
               <option value="baixa">Baixa</option>
             </select>
             
-             <select 
-               value={categoriaId} onChange={(e) => setCategoriaId(e.target.value)}
-               style={{ 
-                 flex: '1 1 120px', padding: '0.6rem', 
-                 background: 'rgba(15, 23, 42, 0.7)', color: '#ffffff',
-                 border: '1px solid var(--glass-border)', borderRadius: '10px', outline: 'none'
-               }}
-             >
+            <select 
+              value={categoriaId} onChange={(e) => setCategoriaId(e.target.value)}
+              style={{ flex: '1 1 120px' }}
+            >
               {categorias.map(c => (
                   <option key={c.id} value={c.id}>{c.nome}</option>
               ))}
@@ -112,15 +77,9 @@ export default function TaskEditModal({ tarefa = {}, categorias = [], onClose, o
           </div>
 
           <input 
-            type="text" placeholder="Tags (separadas por vírgula)" value={tagsInput} 
-            onChange={(e) => setTagsInput(e.target.value)}
-            style={{ 
-              width: '100%', padding: '0.75rem', borderRadius: '10px',
-              border: '1px solid var(--glass-border)', background: 'rgba(15, 23, 42, 0.7)',
-              color: '#ffffff', outline: 'none'
-            }}
+            type="text" placeholder="Tags (separadas por vírgula)" value={tagsInput} onChange={(e) => setTagsInput(e.target.value)}
+            style={{ width: '100%' }}
           />
-
 
           <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', flexWrap: 'wrap' }}>
             <button type="button" onClick={onClose} style={{ flex: '1 1 120px', background: 'transparent', border: '1px solid var(--glass-border)', color: 'var(--text-primary)', padding: '1rem', borderRadius: 'var(--radius-sm)', cursor: 'pointer' }}>Cancelar</button>

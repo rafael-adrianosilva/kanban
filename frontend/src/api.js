@@ -59,7 +59,6 @@ export const setPrimeiraSenha = (nova_senha) => apiFetch('/auth/me/primeira-senh
 export const getCategorias = () => apiFetch('/categorias');
 export const addCategoria = (categoria) => apiFetch('/categorias', { method: 'POST', body: JSON.stringify(categoria) });
 export const deleteCategoria = (id) => apiFetch(`/categorias/${id}`, { method: 'DELETE' });
-export const compartilharCategoria = (id, email) => apiFetch(`/categorias/${id}/compartilhar`, { method: 'POST', body: JSON.stringify({ email }) });
 export const getEstatisticas = () => apiFetch('/estatisticas');
 export const getTarefas = () => apiFetch('/tarefas');
 export const addTarefa = (tarefa) => apiFetch('/tarefas', {

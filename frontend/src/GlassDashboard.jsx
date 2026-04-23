@@ -2,17 +2,16 @@ import React, { useEffect, useState } from 'react';
 import { 
     getEstatisticas, getTarefas, addTarefa, getMe, updateTarefa, deleteTarefa,
     getCategorias, addCategoria, deleteCategoria, updateEmail, updateSenha, setPrimeiraSenha,
-    getHistoricoEstatisticas, compartilharCategoria
+    getHistoricoEstatisticas
 } from './api';
 import EisenhowerMatrix from './EisenhowerMatrix';
 import TaskEditModal from './TaskEditModal';
 import MeetingTimer from './MeetingTimer';
-import ZenGarden from './ZenGarden';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
     Filter, Home, CheckSquare, Layers, Settings, Plus, Calendar, Clock, 
     Trash2, Edit3, Check, Save, Palette, Type, Mail, Lock, LogOut, BarChart2,
-    Menu, X, Zap, Flower2, Smile, Users
+    Menu, X
 } from 'lucide-react';
 import { 
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
@@ -63,26 +62,20 @@ const StatBox = ({ title, value, color }) => (
   </div>
 );
 
-const SidebarItem = ({ icon: Icon, label, active, onClick }) => {
-    return (
-        <div 
-            onClick={onClick}
-            style={{ 
-                display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem', borderRadius: 'var(--radius-sm)', 
-                cursor: 'pointer', background: active ? 'rgba(255,255,255,0.1)' : 'transparent', 
-                border: active ? '1px solid rgba(255,255,255,0.1)' : '1px solid transparent',
-                color: active ? 'var(--accent-color)' : 'var(--text-primary)', 
-                opacity: active ? 1 : 0.7,
-                fontWeight: active ? 700 : 400, transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
-            onMouseLeave={(e) => !active && (e.currentTarget.style.opacity = '0.7')}
-        >
-            <Icon size={20} />
-            <span>{label}</span>
-        </div>
-    );
-};
+const SidebarItem = ({ icon: Icon, label, active, onClick }) => (
+    <div 
+        onClick={onClick}
+        style={{ 
+            display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem', borderRadius: 'var(--radius-sm)', 
+            cursor: 'pointer', background: active ? 'rgba(255,255,255,0.4)' : 'transparent', 
+            color: active ? 'var(--accent-color)' : 'var(--text-secondary)', 
+            fontWeight: active ? 600 : 400, transition: 'all 0.2s' 
+        }}
+    >
+        <Icon size={20} />
+        <span>{label}</span>
+    </div>
+);
 
 /* --- VIEWS --- */
 
@@ -201,8 +194,6 @@ const CategoriesView = ({ categorias, setCategorias, onUpdate, loadCategories, s
     const [novoNome, setNovoNome] = useState('');
     const [novaCor, setNovaCor] = useState('#0ea5e9');
     const [catParaExcluir, setCatParaExcluir] = useState(null);
-    const [catParaCompartilhar, setCatParaCompartilhar] = useState(null);
-    const [emailConvidado, setEmailConvidado] = useState('');
     const [naoPerguntarNovamente, setNaoPerguntarNovamente] = useState(localStorage.getItem('zengrid_skip_cat_confirm') === 'true');
 
     const handleAdd = async (e) => {
@@ -256,18 +247,6 @@ const CategoriesView = ({ categorias, setCategorias, onUpdate, loadCategories, s
         localStorage.setItem('zengrid_skip_cat_confirm', val);
     };
 
-    const handleShare = async (e) => {
-        e.preventDefault();
-        try {
-            await compartilharCategoria(catParaCompartilhar.id, emailConvidado);
-            alert(`Convite enviado para ${emailConvidado}!`);
-            setCatParaCompartilhar(null);
-            setEmailConvidado('');
-        } catch (err) {
-            alert(err.message || 'Erro ao compartilhar categoria');
-        }
-    };
-
     return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             <h2 style={{ marginBottom: '2rem', color: 'var(--text-primary)' }}>Gerenciar <span style={{ fontWeight: 700 }}>Categorias</span></h2>
@@ -298,21 +277,12 @@ const CategoriesView = ({ categorias, setCategorias, onUpdate, loadCategories, s
                             <span className="category-label" style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{c.nome}</span>
                         </div>
                         {!['Casa', 'Estudos', 'Pessoal', 'Trabalho', 'Reunião'].includes(c.nome) && ![1, 2, 3, 4, 5].includes(c.id) && (
-                            <div style={{ display: 'flex', gap: '0.2rem' }}>
-                                <button 
-                                    onClick={(e) => { e.stopPropagation(); setCatParaCompartilhar(c); }} 
-                                    title="Compartilhar Categoria"
-                                    style={{ background: 'transparent', border: 'none', color: 'var(--accent-color)', cursor: 'pointer', padding: '0.5rem' }}
-                                >
-                                    <Users size={18}/>
-                                </button>
-                                <button 
-                                    onClick={(e) => { e.stopPropagation(); handleDeleteClick(c); }} 
-                                    style={{ background: 'transparent', border: 'none', color: 'var(--priority-urgent)', cursor: 'pointer', padding: '0.5rem' }}
-                                >
-                                    <Trash2 size={18}/>
-                                </button>
-                            </div>
+                            <button 
+                                onClick={() => handleDeleteClick(c)} 
+                                style={{ background: 'transparent', border: 'none', color: 'var(--priority-urgent)', cursor: 'pointer', padding: '0.5rem' }}
+                            >
+                                <Trash2 size={18}/>
+                            </button>
                         )}
                     </div>
                 ))}
@@ -327,7 +297,7 @@ const CategoriesView = ({ categorias, setCategorias, onUpdate, loadCategories, s
                 )}
             </div>
 
-            {/* Modal de Confirmação de Exclusão */}
+            {/* Modal de Confirmação */}
             {catParaExcluir && (
                 <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(5px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000 }}>
                     <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass-panel" style={{ padding: '2rem', maxWidth: '400px', width: '90%', textAlign: 'center' }}>
@@ -343,33 +313,6 @@ const CategoriesView = ({ categorias, setCategorias, onUpdate, loadCategories, s
                             <button onClick={() => setCatParaExcluir(null)} style={{ flex: 1, padding: '0.8rem', background: 'transparent', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-sm)', cursor: 'pointer' }}>Cancelar</button>
                             <button onClick={() => confirmDelete(catParaExcluir.id)} style={{ flex: 1, padding: '0.8rem', background: 'var(--priority-urgent)', color: 'white', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 600, cursor: 'pointer' }}>Excluir</button>
                         </div>
-                    </motion.div>
-                </div>
-            )}
-
-            {/* Modal de Compartilhamento (Shared Spaces) */}
-            {catParaCompartilhar && (
-                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000 }}>
-                    <motion.div initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="glass-panel" style={{ padding: '2.5rem', maxWidth: '450px', width: '90%' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                            <h3 style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><Users color="var(--accent-color)" /> Shared Space</h3>
-                            <button onClick={() => setCatParaCompartilhar(null)} style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}><X /></button>
-                        </div>
-                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '2rem' }}>Convide alguém para colaborar na categoria <span style={{ color: catParaCompartilhar.cor, fontWeight: 700 }}>{catParaCompartilhar.nome}</span>. Eles poderão criar e editar tarefas aqui.</p>
-                        
-                        <form onSubmit={handleShare}>
-                            <div style={{ marginBottom: '1.5rem' }}>
-                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>E-mail do Colaborador</label>
-                                <input 
-                                    type="email" placeholder="email@exemplo.com" required value={emailConvidado} 
-                                    onChange={(e) => setEmailConvidado(e.target.value)}
-                                    style={{ width: '100%', padding: '1rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)' }} 
-                                />
-                            </div>
-                            <button type="submit" style={{ width: '100%', padding: '1rem', background: 'var(--accent-color)', color: 'white', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
-                                <Plus size={20} /> Convidar para o Quadro
-                            </button>
-                        </form>
                     </motion.div>
                 </div>
             )}
@@ -782,34 +725,6 @@ export default function GlassDashboard({ onNavigateToProfile, onLogout }) {
   const [tarefaEditando, setTarefaEditando] = useState(null);
   const [isNewTaskModalOpen, setIsNewTaskModalOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  
-  // Mood Sync State
-  const [mood, setMood] = useState(localStorage.getItem('zengrid_mood') || 'normal'); // 'low', 'normal', 'high'
-  const [showMoodModal, setShowMoodModal] = useState(!localStorage.getItem('zengrid_mood_today'));
-
-  // Biofeedback: Monitorar saúde do quadro
-  useEffect(() => {
-    if (estatisticas.atrasadas > 0) {
-      document.body.classList.add('bio-alert');
-    } else {
-      document.body.classList.remove('bio-alert');
-    }
-  }, [estatisticas.atrasadas]);
-
-  // Adaptive Glass: Monitorar ciclo circadiano
-  useEffect(() => {
-    const checkTime = () => {
-      const hour = new Date().getHours();
-      if (hour >= 18 || hour < 6) {
-        document.body.classList.add('glass-night');
-      } else {
-        document.body.classList.remove('glass-night');
-      }
-    };
-    checkTime();
-    const interval = setInterval(checkTime, 60000); // Check every minute
-    return () => clearInterval(interval);
-  }, []);
 
   const loadStats = async () => {
     try {
@@ -873,26 +788,7 @@ export default function GlassDashboard({ onNavigateToProfile, onLogout }) {
               categoria_cor: cat ? cat.cor : t.categoria_cor
           };
       });
-
-      // Mood Sync Logic: Ordenar tarefas baseado no nível de energia
-      let sortedTasks = [...enrichedTasks];
-      if (mood === 'low') {
-        // Prioriza tarefas baixas e deletáveis (limpeza leve)
-        sortedTasks.sort((a, b) => {
-            const priorityScore = { baixa: 0, media: 1, urgente: 2 };
-            return priorityScore[a.prioridade] - priorityScore[b.prioridade];
-        });
-      } else if (mood === 'high') {
-        // Prioriza tarefas urgentes e "Deep Work" (tags)
-        sortedTasks.sort((a, b) => {
-            const priorityScore = { urgente: 0, media: 1, baixa: 2 };
-            if (a.tags?.includes('Deep Work') && !b.tags?.includes('Deep Work')) return -1;
-            if (!a.tags?.includes('Deep Work') && b.tags?.includes('Deep Work')) return 1;
-            return priorityScore[a.prioridade] - priorityScore[b.prioridade];
-        });
-      }
-
-      setTarefas(sortedTasks); 
+      setTarefas(enrichedTasks); 
     } catch (e) { 
         console.error(e); 
     } finally { 
@@ -946,46 +842,6 @@ export default function GlassDashboard({ onNavigateToProfile, onLogout }) {
         {tarefaEditando && <TaskEditModal tarefa={tarefaEditando} categorias={categorias} onClose={() => setTarefaEditando(null)} onSave={handleSaveModal} />}
         {isNewTaskModalOpen && <TaskEditModal tarefa={{}} categorias={categorias} onClose={() => setIsNewTaskModalOpen(false)} onSave={handleSaveModal} />}
 
-        {/* Mood Sync Modal */}
-        <AnimatePresence>
-            {showMoodModal && (
-                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(20px)', zIndex: 5000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
-                    <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.8, opacity: 0 }} className="glass-panel" style={{ padding: '3rem', maxWidth: '500px', textAlign: 'center' }}>
-                        <Zap size={48} color="var(--accent-color)" style={{ marginBottom: '1.5rem' }} />
-                        <h2 style={{ marginBottom: '1rem' }}>Sincronização de Humor</h2>
-                        <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>Como está sua energia para o <span style={{ fontWeight: 700 }}>Zen Grid</span> hoje? Vou ajustar sua visão operacional.</p>
-                        
-                        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                            <button 
-                                onClick={() => { setMood('low'); setShowMoodModal(false); localStorage.setItem('zengrid_mood', 'low'); localStorage.setItem('zengrid_mood_today', new Date().toDateString()); }}
-                                style={{ flex: 1, padding: '1.5rem', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.1)', border: '1px solid var(--glass-border)', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}
-                            >
-                                <span style={{ fontSize: '2rem' }}>☕</span>
-                                <span style={{ fontWeight: 600 }}>Leve</span>
-                                <span style={{ fontSize: '0.7rem', opacity: 0.7 }}>Tarefas rápidas</span>
-                            </button>
-                            <button 
-                                onClick={() => { setMood('normal'); setShowMoodModal(false); localStorage.setItem('zengrid_mood', 'normal'); localStorage.setItem('zengrid_mood_today', new Date().toDateString()); }}
-                                style={{ flex: 1, padding: '1.5rem', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.1)', border: '1px solid var(--glass-border)', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}
-                            >
-                                <span style={{ fontSize: '2rem' }}>⚖️</span>
-                                <span style={{ fontWeight: 600 }}>Equilibrado</span>
-                                <span style={{ fontSize: '0.7rem', opacity: 0.7 }}>Fluxo normal</span>
-                            </button>
-                            <button 
-                                onClick={() => { setMood('high'); setShowMoodModal(false); localStorage.setItem('zengrid_mood', 'high'); localStorage.setItem('zengrid_mood_today', new Date().toDateString()); }}
-                                style={{ flex: 1, padding: '1.5rem', borderRadius: 'var(--radius-md)', background: 'var(--accent-color)', border: 'none', color: 'white', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}
-                            >
-                                <span style={{ fontSize: '2rem' }}>🔥</span>
-                                <span style={{ fontWeight: 600 }}>Focado</span>
-                                <span style={{ fontSize: '0.7rem', opacity: 0.9 }}>Deep Work</span>
-                            </button>
-                        </div>
-                    </motion.div>
-                </div>
-            )}
-        </AnimatePresence>
-
         {/* Mobile Header */}
         <div className="mobile-header">
             <button onClick={() => setIsSidebarOpen(true)} style={{ background: 'transparent', border: 'none', color: 'var(--text-primary)', cursor: 'pointer' }}>
@@ -1001,35 +857,28 @@ export default function GlassDashboard({ onNavigateToProfile, onLogout }) {
         {/* Sidebar Overlay */}
         <div className={`sidebar-overlay ${isSidebarOpen ? 'open' : ''}`} onClick={() => setIsSidebarOpen(false)} />
 
-        <aside className={`sidebar ${isSidebarOpen ? 'open' : ''}`} style={{ 
-            background: 'var(--sidebar-bg)', 
-            backdropFilter: 'blur(30px) saturate(180%)', 
-            borderRight: '1px solid var(--glass-border)',
-            boxShadow: '10px 0 30px rgba(0,0,0,0.05)'
-        }}>
+        {/* --- SIDEBAR --- */}
+        <aside className={`sidebar glass-panel ${isSidebarOpen ? 'open' : ''}`}>
             <div style={{ padding: '2.5rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h2 style={{ 
-                    fontSize: '1.8rem', fontWeight: 900, 
-                    color: 'var(--text-primary)', 
-                    display: 'flex', alignItems: 'center', gap: '0.6rem', letterSpacing: '-1px' 
-                }}>
-                    <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: 'var(--accent-color)', boxShadow: '0 0 20px var(--accent-color)' }} />
+                <h2 style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                    <div style={{ width: '14px', height: '14px', borderRadius: '50%', background: 'var(--accent-color)', boxShadow: '0 0 15px var(--accent-color)' }} />
                     Zen Grid
                 </h2>
-                {isSidebarOpen && <button onClick={() => setIsSidebarOpen(false)} style={{ background: 'transparent', border: 'none', color: 'var(--text-primary)' }}><X size={24} /></button>}
+                <button className="mobile-only" onClick={() => setIsSidebarOpen(false)} style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'none' }}>
+                    <X size={24} />
+                </button>
             </div>
             
             <nav style={{ flex: 1, padding: '0 1.2rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 <SidebarItem icon={Home} label="Dashboard" active={activeView === 'dashboard'} onClick={() => { setActiveView('dashboard'); setIsSidebarOpen(false); }} />
                 <SidebarItem icon={CheckSquare} label="Minhas Tarefas" active={activeView === 'tasks'} onClick={() => { setActiveView('tasks'); setIsSidebarOpen(false); }} />
                 <SidebarItem icon={BarChart2} label="Gráficos" active={activeView === 'charts'} onClick={() => { setActiveView('charts'); setIsSidebarOpen(false); }} />
-                <SidebarItem icon={Flower2} label="Jardim Digital" active={activeView === 'garden'} onClick={() => { setActiveView('garden'); setIsSidebarOpen(false); }} />
                 <SidebarItem icon={Layers} label="Categorias" active={activeView === 'categories'} onClick={() => { setActiveView('categories'); setIsSidebarOpen(false); }} />
                 <SidebarItem icon={Settings} label="Configurações" active={activeView === 'settings'} onClick={() => { setActiveView('settings'); setIsSidebarOpen(false); }} />
             </nav>
 
             <div style={{ padding: '1.5rem', borderTop: '1px solid var(--glass-border)' }}>
-                <div onClick={onNavigateToProfile} style={{ display: 'flex', alignItems: 'center', gap: '1rem', cursor: 'pointer', padding: '0.8rem', borderRadius: 'var(--radius-sm)' }}>
+                <div onClick={onNavigateToProfile} style={{ display: 'flex', alignItems: 'center', gap: '1rem', cursor: 'pointer', padding: '0.8rem', borderRadius: 'var(--radius-sm)' }} className="hover-highlight">
                     <UserAvatar src={perfil?.foto_avatar} name={perfil?.nome} size="48px" />
                     <div style={{ flex: 1, overflow: 'hidden' }}>
                         <p style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-primary)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{perfil?.nome}</p>
@@ -1058,9 +907,6 @@ export default function GlassDashboard({ onNavigateToProfile, onLogout }) {
                 )}
                 {activeView === 'charts' && (
                     <ChartsView key="v-charts" />
-                )}
-                {activeView === 'garden' && (
-                    <ZenGarden key="v-garden" tarefas={tarefas} estatisticas={estatisticas} />
                 )}
                 {activeView === 'categories' && (
                     <CategoriesView 
