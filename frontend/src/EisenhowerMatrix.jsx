@@ -49,7 +49,7 @@ const TaskCardVisual = React.forwardRef(({ tarefa, index, onUpdate, onEdit, prov
         position: 'relative',
         borderRadius: 'var(--radius-md)',
         border: snapshot.isDragging ? '2px solid var(--accent-color)' : '1px solid transparent',
-        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        transition: snapshot.isDragging ? 'none' : 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
         ...provided.draggableProps.style
       }}
     >
@@ -140,12 +140,14 @@ export default function EisenhowerMatrix({ tarefas, onUpdate, onEditTask }) {
   const quadrante3 = tarefas.filter(t => t.prioridade === 'baixa' && t.status !== 'concluida');
   const quadrante4 = tarefas.filter(t => t.status === 'concluida');
 
-  const onDragEnd = async (result) => {
+  const onDragEnd = (result) => {
     if (!result.destination) return;
     const { source, destination, draggableId } = result;
-    if (source.droppableId === destination.droppableId) return; // Nenhuma mudança de quadrante
+    if (source.droppableId === destination.droppableId) return;
 
     const tarefaTarget = tarefas.find(t => t.id.toString() === draggableId);
+    if (!tarefaTarget) return;
+
     let novoStatus = tarefaTarget.status;
     let novaPrioridade = tarefaTarget.prioridade;
 
@@ -158,24 +160,16 @@ export default function EisenhowerMatrix({ tarefas, onUpdate, onEditTask }) {
         else if (destination.droppableId === "Delegar / Depois") novaPrioridade = 'baixa';
     }
     
-    await updateTarefa(draggableId, { status: novoStatus, prioridade: novaPrioridade });
-    onUpdate();
+    // Execução assíncrona sem bloquear o ciclo do dnd
+    updateTarefa(draggableId, { status: novoStatus, prioridade: novaPrioridade })
+      .then(() => onUpdate())
+      .catch(err => console.error("Erro ao mover tarefa:", err));
   };
 
   const animacoesAtivas = localStorage.getItem('zengrid_anim_quad') === 'true';
 
   const Quadrant = ({ title, desc, tasks, color }) => (
-    <Droppable 
-      droppableId={title}
-      renderClone={(provided, snapshot, rubric) => (
-        <TaskCardVisual 
-          tarefa={tasks[rubric.source.index]} 
-          index={rubric.source.index} 
-          onUpdate={onUpdate} onEdit={onEditTask} 
-          provided={provided} snapshot={snapshot} ref={provided.innerRef} 
-        />
-      )}
-    >
+    <Droppable droppableId={title}>
      {(provided, snapshot) => (
         <div 
             ref={provided.innerRef} 
