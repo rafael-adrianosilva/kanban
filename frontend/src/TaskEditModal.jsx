@@ -6,7 +6,7 @@ export default function TaskEditModal({ tarefa = {}, categorias = [], onClose, o
   const [titulo, setTitulo] = useState(tarefa.titulo || '');
   const [descricao, setDescricao] = useState(tarefa.descricao || '');
   const [prioridade, setPrioridade] = useState(tarefa.prioridade || 'media');
-  const [categoriaId, setCategoriaId] = useState(tarefa.categoria_id || 1);
+  const [categoriaId, setCategoriaId] = useState(tarefa.categoria_id || (categorias.length > 0 ? categorias[0].id : ''));
   const [tagsInput, setTagsInput] = useState(tarefa.tags ? tarefa.tags.join(', ') : '');
   const [dataLimite, setDataLimite] = useState(tarefa.data_limite ? (tarefa.data_limite.includes(' ') ? tarefa.data_limite.replace(' ', 'T') : tarefa.data_limite) : '');
 
@@ -65,14 +65,14 @@ export default function TaskEditModal({ tarefa = {}, categorias = [], onClose, o
             </select>
             
             <select 
-              value={categoriaId} onChange={(e) => setCategoriaId(Number(e.target.value))}
+              value={categoriaId} onChange={(e) => setCategoriaId(e.target.value)}
               style={{ flex: '1 1 120px' }}
             >
               {categorias.map(c => (
                   <option key={c.id} value={c.id}>{c.nome}</option>
               ))}
               {/* Fallback caso Reunião não esteja na lista vinda do banco */}
-              {!categorias.some(c => c.nome === 'Reunião') && <option value={999}>Reunião</option>}
+              {!categorias.some(c => c.nome === 'Reunião') && <option value="reuniao_fallback">Reunião</option>}
             </select>
           </div>
 
