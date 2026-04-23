@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const db = require('./database'); // Agora exporta o Firestore
-const bcrypt = require('bcryptjs');
+const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 const app = express();
@@ -10,19 +10,6 @@ const JWT_SECRET = 'segredo_zengrid_super_seguro_2026';
 
 app.use(cors());
 app.use(express.json());
-
-// Endpoint temporário de diagnóstico - REMOVER DEPOIS
-app.get('/debug', (req, res) => {
-    const { initError } = require('./firebase');
-    const admin = require('firebase-admin');
-    res.json({
-        hasEnvVar: !!process.env.FIREBASE_SERVICE_ACCOUNT,
-        envVarLength: process.env.FIREBASE_SERVICE_ACCOUNT ? process.env.FIREBASE_SERVICE_ACCOUNT.length : 0,
-        adminApps: admin.apps.length,
-        dbReady: db !== null,
-        initError: initError || null,
-    });
-});
 
 const autenticarToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
@@ -118,11 +105,7 @@ app.post('/auth/google', async (req, res) => {
         res.status(200).json({ token, usuario: { id: usuario.id, nome: usuario.nome, email: usuario.email, foto: usuario.foto_avatar } });
     } catch (error) {
         console.error("Erro Google Auth:", error);
-        res.status(401).json({ 
-            erro: 'Token do Google inválido ou expirado',
-            detalhes: error.message,
-            code: error.code || 'unknown'
-        });
+        res.status(401).json({ erro: 'Token do Google inválido ou expirado' });
     }
 });
 
@@ -382,16 +365,6 @@ app.delete('/tarefas/:id', autenticarToken, async (req, res) => {
     } catch (error) {
         res.status(500).json({ erro: 'Erro ao deletar tarefa' });
     }
-});
-
-// Middleware global de tratamento de erros
-app.use((err, req, res, next) => {
-    console.error('ERRO NÃO TRATADO:', err);
-    res.status(500).json({
-        erro: 'Erro interno do servidor',
-        detalhes: err.message,
-        stack: err.stack
-    });
 });
 
 if (!process.env.VERCEL) {
