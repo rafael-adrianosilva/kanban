@@ -1,4 +1,4 @@
-const API_URL = window.location.hostname === 'localhost'
+const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
   ? 'http://localhost:3000'
   : ''; // No Vercel, as rotas serão relativas se usarmos rewrites ou se a API estiver no mesmo domínio
 
@@ -15,7 +15,18 @@ export const apiFetch = async (endpoint, options = {}) => {
     headers,
   });
 
-  const data = response.status === 204 ? null : await response.json();
+  let data = null;
+  const contentType = response.headers.get('content-type');
+  
+  if (response.status !== 204 && contentType && contentType.includes('application/json')) {
+    data = await response.json();
+  } else if (response.status !== 204) {
+    const text = await response.text();
+    if (!response.ok) {
+        throw new Error(`Erro ${response.status}: O servidor não retornou JSON. Verifique se o endpoint existe.`);
+    }
+    data = { text };
+  }
 
   if (!response.ok) {
     throw new Error(data?.erro || 'Erro na requisição');
@@ -43,6 +54,7 @@ export const getMe = () => apiFetch('/auth/me');
 export const updateAvatar = (foto_avatar) => apiFetch('/auth/me/avatar', { method: 'PUT', body: JSON.stringify({ foto_avatar }) });
 export const updateEmail = (email) => apiFetch('/auth/me/email', { method: 'PUT', body: JSON.stringify({ email }) });
 export const updateSenha = (senha_atual, nova_senha) => apiFetch('/auth/me/senha', { method: 'PUT', body: JSON.stringify({ senha_atual, nova_senha }) });
+export const setPrimeiraSenha = (nova_senha) => apiFetch('/auth/me/primeira-senha', { method: 'POST', body: JSON.stringify({ nova_senha }) });
 
 export const getCategorias = () => apiFetch('/categorias');
 export const addCategoria = (categoria) => apiFetch('/categorias', { method: 'POST', body: JSON.stringify(categoria) });

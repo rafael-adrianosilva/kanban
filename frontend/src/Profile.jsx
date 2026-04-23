@@ -3,6 +3,41 @@ import { motion } from 'framer-motion';
 import { getMe, updateAvatar } from './api';
 import { ChevronLeft, ChevronRight, Save } from 'lucide-react';
 
+const UserAvatar = ({ src, name, size = '120px' }) => {
+    const [error, setError] = useState(false);
+    const initial = name ? name.charAt(0).toUpperCase() : '?';
+
+    if (!src || error) {
+        return (
+            <div style={{ 
+                width: size, 
+                height: size, 
+                borderRadius: '50%', 
+                border: '3px solid var(--accent-color)', 
+                background: 'var(--accent-color)', 
+                color: 'white', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                fontSize: `calc(${size} / 2)`,
+                fontWeight: 700,
+                flexShrink: 0
+            }}>
+                {initial}
+            </div>
+        );
+    }
+
+    return (
+        <img 
+            src={src} 
+            alt="Avatar" 
+            onError={() => setError(true)}
+            style={{ width: size, height: size, borderRadius: '50%', border: '3px solid var(--accent-color)', background: 'rgba(255,255,255,0.8)', objectFit: 'cover', flexShrink: 0 }} 
+        />
+    );
+};
+
 export default function Profile({ onBackToDashboard, onLogout }) {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -99,11 +134,7 @@ export default function Profile({ onBackToDashboard, onLogout }) {
                         <button onClick={() => handleGenerateAvatar('prev')} style={{ background: 'var(--glass-bg)', border: 'none', padding: '0.5rem', borderRadius: '50%', cursor: 'pointer', color: 'var(--text-primary)' }}><ChevronLeft/></button>
                         
                         <div style={{ position: 'relative' }}>
-                            <img 
-                                src={fotoEditada} 
-                                alt="Avatar" 
-                                style={{ width: '120px', height: '120px', borderRadius: '50%', border: '3px solid var(--accent-color)', background: 'rgba(255,255,255,0.8)' }} 
-                            />
+                            <UserAvatar src={fotoEditada} name={user.nome} size="120px" />
                         </div>
 
                         <button onClick={() => handleGenerateAvatar('next')} style={{ background: 'var(--glass-bg)', border: 'none', padding: '0.5rem', borderRadius: '50%', cursor: 'pointer', color: 'var(--text-primary)' }}><ChevronRight/></button>

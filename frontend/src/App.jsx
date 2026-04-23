@@ -47,6 +47,7 @@ function App() {
           ) : (
             <GlassDashboard 
               onNavigateToProfile={() => setCurrentView('profile')}
+              onLogout={handleLogout}
             />
           )}
         </div>

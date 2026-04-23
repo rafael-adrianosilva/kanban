@@ -11,6 +11,12 @@ const JWT_SECRET = 'segredo_zengrid_super_seguro_2026';
 app.use(cors());
 app.use(express.json());
 
+// Log de todas as requisições para depuração
+app.use((req, res, next) => {
+    console.log(`[${new Date().toLocaleTimeString()}] ${req.method} ${req.url}`);
+    next();
+});
+
 // Função para garantir que as categorias padrão do sistema existam
 const inicializarCategoriasSistema = async () => {
     const categoriasPadrao = [
@@ -120,18 +126,23 @@ app.post('/auth/google', async (req, res) => {
         let usuario;
 
         if (userSnapshot.empty) {
-            // Criar novo usuário se não existir
+            // Criar novo usuário se não existir (Primeiro Login via Google)
             const userRef = await db.collection('usuarios').add({
                 nome: name,
                 email: email,
                 foto_avatar: picture || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}`,
                 criado_em: new Date().toISOString(),
-                googleUser: true
+                googleUser: true // Marca como usuário que veio puramente do Google
             });
-            usuario = { id: userRef.id, nome: name, email: email, foto_avatar: picture };
+            usuario = { id: userRef.id, nome: name, email: email, foto_avatar: picture, googleUser: true };
         } else {
+            // Usuário já existe (pode ter sido registro por email ou login anterior)
             const usuarioDoc = userSnapshot.docs[0];
-            usuario = { id: usuarioDoc.id, ...usuarioDoc.data() };
+            const data = usuarioDoc.data();
+            usuario = { id: usuarioDoc.id, ...data };
+            
+            // Se o usuário já existia mas não tinha googleUser, não marcamos como googleUser puro
+            // Isso garante que quem registrou com email caia no fluxo de "Alterar Senha"
         }
 
         const token = jwt.sign({ id: usuario.id, email: usuario.email }, JWT_SECRET, { expiresIn: '24h' });
@@ -146,12 +157,44 @@ app.get('/auth/me', autenticarToken, async (req, res) => {
     try {
         const userDoc = await db.collection('usuarios').doc(req.usuarioId).get();
         if (!userDoc.exists) return res.status(404).json({ erro: 'Perfil não encontrado' });
-        
-        const usuario = { id: userDoc.id, ...userDoc.data() };
+        const data = userDoc.data();
+        // Garante que flags booleanas sejam enviadas corretamente
+        const usuario = { 
+            id: userDoc.id, 
+            ...data, 
+            temSenha: !!data.senha, 
+            googleUser: data.googleUser === true 
+        };
         delete usuario.senha;
         res.status(200).json(usuario);
     } catch (error) {
         res.status(500).json({ erro: 'Erro ao buscar perfil' });
+    }
+});
+
+app.post('/auth/me/primeira-senha', autenticarToken, async (req, res) => {
+    const { nova_senha } = req.body;
+    if (!nova_senha) return res.status(400).json({ erro: 'Nova senha é obrigatória' });
+
+    try {
+        const userDoc = await db.collection('usuarios').doc(req.usuarioId).get();
+        if (!userDoc.exists) return res.status(404).json({ erro: 'Usuário não encontrado' });
+
+        const userData = userDoc.data();
+        
+        if (!userData.googleUser) {
+            return res.status(403).json({ erro: 'Apenas usuários Google podem criar uma senha inicial.' });
+        }
+
+        if (userData.senha) {
+            return res.status(400).json({ erro: 'Você já possui uma senha.' });
+        }
+
+        const hash = await bcrypt.hash(nova_senha, 10);
+        await db.collection('usuarios').doc(req.usuarioId).update({ senha: hash });
+        res.status(200).json({ mensagem: 'Senha criada com sucesso!' });
+    } catch (error) {
+        res.status(500).json({ erro: 'Erro ao criar senha' });
     }
 });
 

@@ -15,6 +15,16 @@ const TaskCardVisual = React.forwardRef(({ tarefa, index, onUpdate, onEdit, prov
   };
 
   const handleDelete = async () => {
+    if (tarefa.categoria_nome === 'Reunião') {
+      const confirmacao = prompt('Para excluir uma tarefa de Reunião, digite "desejo excluir":');
+      if (confirmacao !== 'desejo excluir') {
+        alert('Exclusão cancelada. Você deve digitar exatamente "desejo excluir".');
+        return;
+      }
+    } else {
+      if (!window.confirm('Tem certeza que deseja excluir esta tarefa?')) return;
+    }
+    
     await deleteTarefa(tarefa.id);
     onUpdate();
   };

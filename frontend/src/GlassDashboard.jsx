@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { 
     getEstatisticas, getTarefas, addTarefa, getMe, updateTarefa, deleteTarefa,
-    getCategorias, addCategoria, deleteCategoria, updateEmail, updateSenha,
+    getCategorias, addCategoria, deleteCategoria, updateEmail, updateSenha, setPrimeiraSenha,
     getHistoricoEstatisticas
 } from './api';
 import EisenhowerMatrix from './EisenhowerMatrix';
@@ -17,6 +17,41 @@ import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
     Cell
 } from 'recharts';
+
+const UserAvatar = ({ src, name, size = '48px' }) => {
+    const [error, setError] = React.useState(false);
+    const initial = name ? name.charAt(0).toUpperCase() : '?';
+
+    if (!src || error) {
+        return (
+            <div style={{ 
+                width: size, 
+                height: size, 
+                borderRadius: '50%', 
+                border: '2px solid var(--accent-color)', 
+                background: 'var(--accent-color)', 
+                color: 'white', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                fontSize: `calc(${size} / 2)`,
+                fontWeight: 700,
+                flexShrink: 0
+            }}>
+                {initial}
+            </div>
+        );
+    }
+
+    return (
+        <img 
+            src={src} 
+            alt="Avatar" 
+            onError={() => setError(true)}
+            style={{ width: size, height: size, borderRadius: '50%', border: '2px solid var(--accent-color)', objectFit: 'cover', flexShrink: 0 }} 
+        />
+    );
+};
 
 /* --- COMPONENTES AUXILIARES --- */
 
@@ -368,7 +403,7 @@ const ChartsView = () => {
 };
 
 // 4. Configurações View
-const SettingsView = ({ perfil, onLogout, animacoesQuadrantes, applyAnimacoes }) => {
+const SettingsView = ({ perfil, onLogout, animacoesQuadrantes, applyAnimacoes, onUpdateProfile }) => {
     const [email, setEmail] = useState(perfil?.email || '');
     const [senhaAtual, setSenhaAtual] = useState('');
     const [novaSenha, setNovaSenha] = useState('');
@@ -399,7 +434,17 @@ const SettingsView = ({ perfil, onLogout, animacoesQuadrantes, applyAnimacoes })
             await updateSenha(senhaAtual, novaSenha);
             alert('Senha alterada!');
             setSenhaAtual(''); setNovaSenha('');
-        } catch(e) { alert(e.erro || 'Falha ao atualizar senha'); }
+        } catch(e) { alert(e.message); }
+    };
+
+    const handleCreatePrimeiraSenha = async (e) => {
+        e.preventDefault();
+        try {
+            await setPrimeiraSenha(novaSenha);
+            alert('Senha criada com sucesso!');
+            setNovaSenha('');
+            if (onUpdateProfile) onUpdateProfile();
+        } catch(e) { alert(e.message); }
     };
 
     const applyTheme = (t) => {
@@ -620,12 +665,37 @@ const SettingsView = ({ perfil, onLogout, animacoesQuadrantes, applyAnimacoes })
                     </div>
 
                     <div style={{ borderTop: '1px solid var(--glass-border)', paddingTop: '2rem' }}>
-                        <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}><Lock size={20}/> Alterar Senha</h3>
-                        <form onSubmit={handleUpdateSenha} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                            <input type="password" placeholder="Senha Atual" value={senhaAtual} onChange={(e) => setSenhaAtual(e.target.value)} required />
-                            <input type="password" placeholder="Nova Senha" value={novaSenha} onChange={(e) => setNovaSenha(e.target.value)} required />
-                            <button type="submit" style={{ background: 'var(--text-primary)', color: 'var(--text-inverse)', border: 'none', padding: '1rem', borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontWeight: 600 }}>Trocar Senha</button>
-                        </form>
+                        {perfil?.googleUser && !perfil?.temSenha ? (
+                            <>
+                                <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <Lock size={20}/> Criar uma Senha
+                                </h3>
+                                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
+                                    Como você entrou pelo Google, você pode criar uma senha para acessar sua conta diretamente.
+                                </p>
+                                <form onSubmit={handleCreatePrimeiraSenha} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                    <input type="password" placeholder="Nova Senha" value={novaSenha} onChange={(e) => setNovaSenha(e.target.value)} required />
+                                    <button type="submit" style={{ background: 'var(--text-primary)', color: tema === 'theme-dark' ? '#000' : 'var(--text-inverse)', border: 'none', padding: '1rem', borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontWeight: 600 }}>
+                                        Criar Senha
+                                    </button>
+                                </form>
+                            </>
+                        ) : perfil?.temSenha ? (
+                            <>
+                                <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <Lock size={20}/> Alterar Senha
+                                </h3>
+                                <form onSubmit={handleUpdateSenha} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                    <input type="password" placeholder="Senha Atual" value={senhaAtual} onChange={(e) => setSenhaAtual(e.target.value)} required />
+                                    <input type="password" placeholder="Nova Senha" value={novaSenha} onChange={(e) => setNovaSenha(e.target.value)} required />
+                                    <button type="submit" style={{ background: 'var(--text-primary)', color: tema === 'theme-dark' ? '#000' : 'var(--text-inverse)', border: 'none', padding: '1rem', borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontWeight: 600 }}>
+                                        Trocar Senha
+                                    </button>
+                                </form>
+                            </>
+                        ) : (
+                            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Configurações de segurança não aplicáveis.</p>
+                        )}
                     </div>
 
                     <div style={{ marginTop: 'auto' }}>
@@ -809,7 +879,7 @@ export default function GlassDashboard({ onNavigateToProfile, onLogout }) {
 
             <div style={{ padding: '1.5rem', borderTop: '1px solid var(--glass-border)' }}>
                 <div onClick={onNavigateToProfile} style={{ display: 'flex', alignItems: 'center', gap: '1rem', cursor: 'pointer', padding: '0.8rem', borderRadius: 'var(--radius-sm)' }} className="hover-highlight">
-                    <img src={perfil?.foto_avatar} alt="Avatar" style={{ width: '48px', height: '48px', borderRadius: '50%', border: '2px solid var(--accent-color)', objectFit: 'cover' }} />
+                    <UserAvatar src={perfil?.foto_avatar} name={perfil?.nome} size="48px" />
                     <div style={{ flex: 1, overflow: 'hidden' }}>
                         <p style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-primary)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{perfil?.nome}</p>
                         <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{perfil?.email}</p>
@@ -857,6 +927,7 @@ export default function GlassDashboard({ onNavigateToProfile, onLogout }) {
                         animacoesQuadrantes={animacoesQuadrantes}
                         setAnimacoesQuadrantes={setAnimacoesQuadrantes}
                         applyAnimacoes={applyAnimacoes}
+                        onUpdateProfile={loadProfile}
                     />
                 )}
             </AnimatePresence>
