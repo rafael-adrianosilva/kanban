@@ -172,8 +172,6 @@ export default function EisenhowerMatrix({ tarefas, onUpdate, onEditTask }) {
     <Droppable droppableId={title}>
      {(provided, snapshot) => (
         <div 
-            ref={provided.innerRef} 
-            {...provided.droppableProps}
             className={`glass-panel quadrant-container ${snapshot.isDraggingOver ? 'quadrant-active' : ''} ${animacoesAtivas ? 'animate-glow' : ''}`}
             style={{ 
                 padding: '1.5rem', display: 'flex', flexDirection: 'column', height: '100%', minHeight: '400px',
@@ -189,7 +187,11 @@ export default function EisenhowerMatrix({ tarefas, onUpdate, onEditTask }) {
             </h3>
             <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.3rem' }}>{desc}</p>
           </div>
-          <div style={{ flex: 1, minHeight: '100px' }}>
+          <div 
+              ref={provided.innerRef} 
+              {...provided.droppableProps}
+              style={{ flex: 1, minHeight: '100px' }}
+          >
               {tasks.map((t, idx) => (
                 <TaskCard key={t.id.toString()} index={idx} tarefa={t} onUpdate={onUpdate} onEdit={onEditTask} />
               ))}
