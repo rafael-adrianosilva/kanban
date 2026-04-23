@@ -5,6 +5,10 @@ let serviceAccount;
 if (process.env.FIREBASE_SERVICE_ACCOUNT) {
   try {
     serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+    // Correção comum para chaves privadas no Vercel
+    if (serviceAccount.private_key) {
+      serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
+    }
   } catch (e) {
     console.error("Erro ao parsear FIREBASE_SERVICE_ACCOUNT:", e.message);
   }
