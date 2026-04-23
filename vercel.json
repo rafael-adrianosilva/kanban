@@ -31,6 +31,10 @@
       "destination": "api/index.js"
     },
     {
+      "source": "/debug",
+      "destination": "api/index.js"
+    },
+    {
       "source": "/(.*)",
       "destination": "frontend/$1"
     }

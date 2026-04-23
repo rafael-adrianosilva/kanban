@@ -1,39 +1,45 @@
 const admin = require('firebase-admin');
 
-let serviceAccount;
+let db = null;
+let initError = null;
 
-if (process.env.FIREBASE_SERVICE_ACCOUNT) {
-  try {
+try {
+  let serviceAccount;
+
+  if (process.env.FIREBASE_SERVICE_ACCOUNT) {
     serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
     // Correção comum para chaves privadas no Vercel
     if (serviceAccount.private_key) {
       serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
     }
-  } catch (e) {
-    console.error("Erro ao parsear FIREBASE_SERVICE_ACCOUNT:", e.message);
-  }
-} else {
-  try {
-    // Fallback local
-    serviceAccount = require('./serviceAccountKey.json');
-  } catch (e) {
-    // Apenas avisa, não quebra o build
-  }
-}
-
-if (!admin.apps.length) {
-  if (serviceAccount) {
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount)
-    });
-    console.log("Firebase Admin inicializado com Service Account.");
+    console.log("Service Account carregado. Project ID:", serviceAccount.project_id);
   } else {
-    // No Vercel, isso causará o erro 16 UNAUTHENTICATED se tentar usar o db
-    console.error("CRITICAL: Nenhuma credencial do Firebase encontrada! Configure FIREBASE_SERVICE_ACCOUNT no Vercel.");
-    admin.initializeApp(); // Tenta usar default credentials
+    try {
+      serviceAccount = require('./serviceAccountKey.json');
+      console.log("Service Account local carregado.");
+    } catch (e) {
+      console.error("serviceAccountKey.json não encontrado.");
+    }
   }
+
+  if (!admin.apps.length) {
+    if (serviceAccount) {
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount)
+      });
+      console.log("Firebase Admin inicializado com sucesso!");
+    } else {
+      initError = "Nenhuma credencial encontrada. Configure FIREBASE_SERVICE_ACCOUNT.";
+      console.error("CRITICAL:", initError);
+    }
+  }
+
+  if (admin.apps.length > 0) {
+    db = admin.firestore();
+  }
+} catch (e) {
+  initError = e.message;
+  console.error("ERRO FATAL na inicialização do Firebase:", e.message);
 }
 
-const db = admin.firestore();
-
-module.exports = { admin, db };
+module.exports = { admin, db, initError };
