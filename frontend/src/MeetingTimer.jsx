@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
 
-export default function MeetingTimer({ targetDate }) {
+export default function MeetingTimer({ targetDate, isConcluida }) {
   const [timeLeft, setTimeLeft] = useState('');
 
   useEffect(() => {
+    if (isConcluida) {
+      setTimeLeft('Terminado');
+      return;
+    }
     if (!targetDate) return;
 
     const calculateTimeLeft = () => {

@@ -6,6 +6,8 @@ import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import MeetingTimer from './MeetingTimer';
 
 const TaskCardVisual = React.forwardRef(({ tarefa, index, onUpdate, onEdit, provided, snapshot }, ref) => {
+  const isReuniaoConcluida = tarefa.categoria_nome === 'Reunião' && tarefa.status === 'concluida';
+
   const toggleStatus = async () => {
     const novoStatus = tarefa.status === 'pendente' ? 'concluida' : 'pendente';
     await updateTarefa(tarefa.id, { status: novoStatus });
@@ -80,51 +82,55 @@ const TaskCardVisual = React.forwardRef(({ tarefa, index, onUpdate, onEdit, prov
             ))}
           </div>
           {tarefa.categoria_nome === 'Reunião' && tarefa.data_limite && (
-              <MeetingTimer targetDate={tarefa.data_limite} />
+              <MeetingTimer targetDate={tarefa.data_limite} isConcluida={tarefa.status === 'concluida'} />
           )}
         </div>
         
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            <button onClick={toggleStatus} style={{ background: tarefa.status === 'concluida' ? 'var(--priority-low)' : 'var(--glass-bg)', border: '1px solid var(--glass-border)', color: tarefa.status === 'concluida' ? 'var(--text-inverse)' : 'var(--text-secondary)', width: '32px', height: '32px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Check size={16} />
-            </button>
-            <button onClick={() => onEdit(tarefa)} title="Editar" style={{ background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', color: 'var(--text-secondary)', width: '32px', height: '32px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Edit3 size={15} />
-            </button>
-            <div style={{ position: 'relative' }}>
-                <button onClick={() => setShowMoveMenu(!showMoveMenu)} title="Mover para..." style={{ background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', color: 'var(--accent-color)', width: '32px', height: '32px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Move size={15} />
-                </button>
-                {showMoveMenu && (
-                    <div className="glass-panel" style={{ position: 'absolute', right: '40px', top: '0', zIndex: 100, width: '180px', padding: '0.5rem', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}>
-                        <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', padding: '0.4rem', fontWeight: 700, textTransform: 'uppercase' }}>Mover para:</p>
-                        <button onClick={() => moveTask('urgente', 'pendente')} style={{ width: '100%', textAlign: 'left', padding: '0.5rem', background: 'transparent', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem' }}>
-                            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--priority-urgent)' }} /> Fazer Agora
-                        </button>
-                        <button onClick={() => moveTask('media', 'pendente')} style={{ width: '100%', textAlign: 'left', padding: '0.5rem', background: 'transparent', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem' }}>
-                            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--priority-medium)' }} /> Agendar / Focar
-                        </button>
-                        <button onClick={() => moveTask('baixa', 'pendente')} style={{ width: '100%', textAlign: 'left', padding: '0.5rem', background: 'transparent', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem' }}>
-                            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--priority-low)' }} /> Delegar / Depois
-                        </button>
-                        <button onClick={() => moveTask(tarefa.prioridade, 'concluida')} style={{ width: '100%', textAlign: 'left', padding: '0.5rem', background: 'transparent', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem' }}>
-                            <Check size={14} color="var(--priority-low)" /> Concluir
-                        </button>
-                    </div>
-                )}
-            </div>
-            <button onClick={handleDelete} title="Excluir" style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', color: 'var(--priority-urgent)', width: '32px', height: '32px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Trash2 size={15} />
-            </button>
-        </div>
+        {!isReuniaoConcluida && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <button onClick={toggleStatus} style={{ background: tarefa.status === 'concluida' ? 'var(--priority-low)' : 'var(--glass-bg)', border: '1px solid var(--glass-border)', color: tarefa.status === 'concluida' ? 'var(--text-inverse)' : 'var(--text-secondary)', width: '32px', height: '32px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Check size={16} />
+              </button>
+              <button onClick={() => onEdit(tarefa)} title="Editar" style={{ background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', color: 'var(--text-secondary)', width: '32px', height: '32px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Edit3 size={15} />
+              </button>
+              <div style={{ position: 'relative' }}>
+                  <button onClick={() => setShowMoveMenu(!showMoveMenu)} title="Mover para..." style={{ background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', color: 'var(--accent-color)', width: '32px', height: '32px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Move size={15} />
+                  </button>
+                  {showMoveMenu && (
+                      <div className="glass-panel" style={{ position: 'absolute', right: '40px', top: '0', zIndex: 100, width: '180px', padding: '0.5rem', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}>
+                          <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', padding: '0.4rem', fontWeight: 700, textTransform: 'uppercase' }}>Mover para:</p>
+                          <button onClick={() => moveTask('urgente', 'pendente')} style={{ width: '100%', textAlign: 'left', padding: '0.5rem', background: 'transparent', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem' }}>
+                              <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--priority-urgent)' }} /> Fazer Agora
+                          </button>
+                          <button onClick={() => moveTask('media', 'pendente')} style={{ width: '100%', textAlign: 'left', padding: '0.5rem', background: 'transparent', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem' }}>
+                              <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--priority-medium)' }} /> Agendar / Focar
+                          </button>
+                          <button onClick={() => moveTask('baixa', 'pendente')} style={{ width: '100%', textAlign: 'left', padding: '0.5rem', background: 'transparent', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem' }}>
+                              <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--priority-low)' }} /> Delegar / Depois
+                          </button>
+                          <button onClick={() => moveTask(tarefa.prioridade, 'concluida')} style={{ width: '100%', textAlign: 'left', padding: '0.5rem', background: 'transparent', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem' }}>
+                              <Check size={14} color="var(--priority-low)" /> Concluir
+                          </button>
+                      </div>
+                  )}
+              </div>
+              <button onClick={handleDelete} title="Excluir" style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', color: 'var(--priority-urgent)', width: '32px', height: '32px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Trash2 size={15} />
+              </button>
+          </div>
+        )}
       </div>
     </div>
   );
 });
 
 function TaskCard({ tarefa, onUpdate, onEdit, index }) {
+  const isReuniaoConcluida = tarefa.categoria_nome === 'Reunião' && tarefa.status === 'concluida';
+  
   return (
-    <Draggable draggableId={tarefa.id.toString()} index={index}>
+    <Draggable draggableId={tarefa.id.toString()} index={index} isDragDisabled={isReuniaoConcluida}>
         {(provided, snapshot) => {
            const child = (
              <TaskCardVisual 
@@ -168,6 +174,16 @@ export default function EisenhowerMatrix({ tarefas: tarefasProp, onUpdate, onEdi
     let novaPrioridade = tarefaTarget.prioridade;
 
     if (destination.droppableId === "Concluídas") {
+        // Regra para Reunião
+        if (tarefaTarget.categoria_nome === 'Reunião') {
+            const diffMinutos = (new Date(tarefaTarget.data_limite) - new Date()) / (1000 * 60);
+            
+            // Se faltar mais de 5 minutos, pergunta
+            if (diffMinutos > 5) {
+                const certeza = window.confirm(`Faltam ${Math.round(diffMinutos)} minutos para a reunião começar. Tem certeza que deseja concluí-la agora?`);
+                if (!certeza) return;
+            }
+        }
         novoStatus = 'concluida';
     } else {
         novoStatus = 'pendente';
