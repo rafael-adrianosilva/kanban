@@ -11,6 +11,39 @@ const JWT_SECRET = 'segredo_zengrid_super_seguro_2026';
 app.use(cors());
 app.use(express.json());
 
+// Função para garantir que as categorias padrão do sistema existam
+const inicializarCategoriasSistema = async () => {
+    const categoriasPadrao = [
+        { nome: 'Trabalho', cor: '#3b82f6' },
+        { nome: 'Pessoal', cor: '#10b981' },
+        { nome: 'Estudos', cor: '#f59e0b' },
+        { nome: 'Casa', cor: '#ef4444' },
+        { nome: 'Reunião', cor: '#8b5cf6' }
+    ];
+
+    try {
+        for (const cat of categoriasPadrao) {
+            const snapshot = await db.collection('categorias')
+                .where('usuario_id', '==', null)
+                .where('nome', '==', cat.nome)
+                .get();
+
+            if (snapshot.empty) {
+                await db.collection('categorias').add({
+                    ...cat,
+                    usuario_id: null,
+                    criado_em: new Date().toISOString()
+                });
+                console.log(`Categoria de sistema criada: ${cat.nome}`);
+            }
+        }
+    } catch (error) {
+        console.error('Erro ao inicializar categorias do sistema:', error);
+    }
+};
+
+inicializarCategoriasSistema();
+
 const autenticarToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
