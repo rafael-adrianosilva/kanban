@@ -118,7 +118,11 @@ app.post('/auth/google', async (req, res) => {
         res.status(200).json({ token, usuario: { id: usuario.id, nome: usuario.nome, email: usuario.email, foto: usuario.foto_avatar } });
     } catch (error) {
         console.error("Erro Google Auth:", error);
-        res.status(401).json({ erro: 'Token do Google inválido ou expirado' });
+        res.status(401).json({ 
+            erro: 'Token do Google inválido ou expirado',
+            detalhes: error.message,
+            code: error.code || 'unknown'
+        });
     }
 });
 
