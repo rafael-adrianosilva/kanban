@@ -134,7 +134,14 @@ function TaskCard({ tarefa, onUpdate, onEdit, index }) {
   );
 }
 
-export default function EisenhowerMatrix({ tarefas, onUpdate, onEditTask }) {
+export default function EisenhowerMatrix({ tarefas: tarefasProp, onUpdate, onEditTask }) {
+  const [tarefas, setTarefas] = React.useState(tarefasProp);
+
+  // Sincroniza o estado local quando as tarefas vindas do pai mudam
+  React.useEffect(() => {
+    setTarefas(tarefasProp);
+  }, [tarefasProp]);
+
   const quadrante1 = tarefas.filter(t => t.prioridade === 'urgente' && t.status !== 'concluida');
   const quadrante2 = tarefas.filter(t => t.prioridade === 'media' && t.status !== 'concluida');
   const quadrante3 = tarefas.filter(t => t.prioridade === 'baixa' && t.status !== 'concluida');
@@ -159,11 +166,22 @@ export default function EisenhowerMatrix({ tarefas, onUpdate, onEditTask }) {
         else if (destination.droppableId === "Agendar / Focar") novaPrioridade = 'media';
         else if (destination.droppableId === "Delegar / Depois") novaPrioridade = 'baixa';
     }
+
+    // Atualização Otimista: Muda no estado local imediatamente
+    const novasTarefas = tarefas.map(t => 
+      t.id.toString() === draggableId 
+        ? { ...t, status: novoStatus, prioridade: novaPrioridade } 
+        : t
+    );
+    setTarefas(novasTarefas);
     
-    // Execução assíncrona sem bloquear o ciclo do dnd
+    // Execução em segundo plano
     updateTarefa(draggableId, { status: novoStatus, prioridade: novaPrioridade })
       .then(() => onUpdate())
-      .catch(err => console.error("Erro ao mover tarefa:", err));
+      .catch(err => {
+        console.error("Erro ao mover tarefa:", err);
+        setTarefas(tarefasProp); // Reverte em caso de erro
+      });
   };
 
   const animacoesAtivas = localStorage.getItem('zengrid_anim_quad') === 'true';
