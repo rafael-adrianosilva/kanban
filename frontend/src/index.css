@@ -138,29 +138,18 @@ h1, h2, h3, h4, h5, h6 {
 .quadrant-lava::after {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(
-    135deg,
-    transparent 0%,
-    rgba(var(--lava-color-rgb), 0.05) 25%,
-    transparent 50%,
-    rgba(var(--lava-color-rgb), 0.05) 75%,
-    transparent 100%
-  );
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(135deg, transparent, var(--lava-color-soft, transparent));
   background-size: 400% 400%;
   animation: lavaAnimation 15s ease infinite;
   z-index: 0;
   pointer-events: none;
 }
 
-/* Utilitário para converter cores hex para RGB para usar no alpha do lava */
-.q-urgent { --lava-color-rgb: 239, 68, 68; }
-.q-medium { --lava-color-rgb: 245, 158, 11; }
-.q-low { --lava-color-rgb: 16, 185, 129; }
-.q-done { --lava-color-rgb: 14, 165, 233; }
+.q-urgent { --lava-color-soft: rgba(239, 68, 68, 0.05); }
+.q-medium { --lava-color-soft: rgba(245, 158, 11, 0.05); }
+.q-low { --lava-color-soft: rgba(16, 185, 129, 0.05); }
+.q-done { --lava-color-soft: rgba(14, 165, 233, 0.05); }
 
 .animate-fade-in {
   animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
