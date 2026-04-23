@@ -155,24 +155,61 @@ const TasksView = ({ tarefas, onUpdate, onEdit }) => {
 };
 
 // 3. Categorias View
-const CategoriesView = ({ categorias, onUpdate }) => {
+const CategoriesView = ({ categorias, setCategorias, onUpdate, loadCategories, setFiltroCategoria, setActiveView }) => {
     const [novoNome, setNovoNome] = useState('');
     const [novaCor, setNovaCor] = useState('#0ea5e9');
+    const [catParaExcluir, setCatParaExcluir] = useState(null);
+    const [naoPerguntarNovamente, setNaoPerguntarNovamente] = useState(localStorage.getItem('zengrid_skip_cat_confirm') === 'true');
 
     const handleAdd = async (e) => {
         e.preventDefault();
+        if (!novoNome.trim()) return;
+        if (novoNome.toLowerCase() === 'reunião') {
+            alert('A categoria "Reunião" já é um padrão do sistema.');
+            return;
+        }
+
+        // Atualização Otimista
+        const tempId = Date.now();
+        const novaCat = { id: tempId, nome: novoNome, cor: novaCor, temp: true };
+        const oldCats = [...categorias];
+        setCategorias([...categorias, novaCat]);
+        setNovoNome('');
+
         try {
-            if (!novoNome.trim()) return;
-            if (novoNome.toLowerCase() === 'reunião') {
-                alert('A categoria "Reunião" já é um padrão do sistema.');
-                return;
-            }
             await addCategoria({ nome: novoNome, cor: novaCor });
-            setNovoNome('');
-            onUpdate();
+            await loadCategories();
         } catch (err) {
+            setCategorias(oldCats);
             alert(err.message || 'Erro ao adicionar categoria');
         }
+    };
+
+    const handleDeleteClick = (cat) => {
+        if (naoPerguntarNovamente) {
+            confirmDelete(cat.id);
+        } else {
+            setCatParaExcluir(cat);
+        }
+    };
+
+    const confirmDelete = async (id) => {
+        const oldCats = [...categorias];
+        setCategorias(categorias.filter(c => c.id !== id));
+        setCatParaExcluir(null);
+
+        try {
+            await deleteCategoria(id);
+            await loadCategories();
+        } catch (err) {
+            setCategorias(oldCats);
+            alert('Erro ao excluir categoria');
+        }
+    };
+
+    const toggleSkipConfirm = (val) => {
+        setNaoPerguntarNovamente(val);
+        localStorage.setItem('zengrid_skip_cat_confirm', val);
     };
 
     return (
@@ -193,13 +230,24 @@ const CategoriesView = ({ categorias, onUpdate }) => {
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1.5rem' }}>
                 {categorias.map(c => (
-                    <div key={c.id} className="glass-panel" style={{ padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <div key={c.id} className="glass-panel" style={{ padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', opacity: c.temp ? 0.6 : 1 }}>
+                        <div 
+                            style={{ display: 'flex', alignItems: 'center', gap: '1rem', cursor: 'pointer', flex: 1 }}
+                            onClick={() => {
+                                setFiltroCategoria(c.id);
+                                setActiveView('dashboard');
+                            }}
+                        >
                             <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: c.cor }} />
                             <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{c.nome}</span>
                         </div>
                         {!['Casa', 'Estudos', 'Pessoal', 'Trabalho', 'Reunião'].includes(c.nome) && ![1, 2, 3, 4, 5].includes(c.id) && (
-                            <button onClick={async () => { await deleteCategoria(c.id); onUpdate(); }} style={{ background: 'transparent', border: 'none', color: 'var(--priority-urgent)', cursor: 'pointer' }}><Trash2 size={18}/></button>
+                            <button 
+                                onClick={() => handleDeleteClick(c)} 
+                                style={{ background: 'transparent', border: 'none', color: 'var(--priority-urgent)', cursor: 'pointer', padding: '0.5rem' }}
+                            >
+                                <Trash2 size={18}/>
+                            </button>
                         )}
                     </div>
                 ))}
@@ -213,6 +261,26 @@ const CategoriesView = ({ categorias, onUpdate }) => {
                     </div>
                 )}
             </div>
+
+            {/* Modal de Confirmação */}
+            {catParaExcluir && (
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(5px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000 }}>
+                    <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass-panel" style={{ padding: '2rem', maxWidth: '400px', width: '90%', textAlign: 'center' }}>
+                        <h3 style={{ marginBottom: '1rem' }}>Excluir Categoria?</h3>
+                        <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>Isso removerá a categoria "<strong>{catParaExcluir.nome}</strong>". As tarefas vinculadas a ela não serão excluídas.</p>
+                        
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '2rem', justifyContent: 'center' }}>
+                            <input type="checkbox" id="skipConfirm" checked={naoPerguntarNovamente} onChange={(e) => toggleSkipConfirm(e.target.checked)} style={{ cursor: 'pointer' }} />
+                            <label htmlFor="skipConfirm" style={{ fontSize: '0.85rem', cursor: 'pointer' }}>Não perguntar novamente</label>
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '1rem' }}>
+                            <button onClick={() => setCatParaExcluir(null)} style={{ flex: 1, padding: '0.8rem', background: 'transparent', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-sm)', cursor: 'pointer' }}>Cancelar</button>
+                            <button onClick={() => confirmDelete(catParaExcluir.id)} style={{ flex: 1, padding: '0.8rem', background: 'var(--priority-urgent)', color: 'white', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 600, cursor: 'pointer' }}>Excluir</button>
+                        </div>
+                    </motion.div>
+                </div>
+            )}
         </motion.div>
     );
 };
@@ -523,14 +591,53 @@ export default function GlassDashboard({ onNavigateToProfile, onLogout }) {
   const [isNewTaskModalOpen, setIsNewTaskModalOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  const loadStats = async () => {
+    try {
+      const stats = await getEstatisticas();
+      setEstatisticas(stats);
+    } catch (e) { console.error("Erro ao carregar stats:", e); }
+  };
+
+  const loadTasks = async (currentCats) => {
+    try {
+      const tasks = await getTarefas();
+      const catsToUse = currentCats || categorias;
+      const enrichedTasks = (tasks || []).map(t => {
+          const cat = catsToUse.find(c => String(c.id) === String(t.categoria_id));
+          return {
+              ...t,
+              categoria_nome: cat ? cat.nome : t.categoria_nome,
+              categoria_cor: cat ? cat.cor : t.categoria_cor
+          };
+      });
+      setTarefas(enrichedTasks);
+    } catch (e) { console.error("Erro ao carregar tarefas:", e); }
+  };
+
+  const loadCategories = async () => {
+    try {
+      const cats = await getCategorias();
+      setCategorias(cats);
+      return cats;
+    } catch (e) { console.error("Erro ao carregar categorias:", e); return []; }
+  };
+
+  const loadProfile = async () => {
+    try {
+      const dataPerfil = await getMe();
+      setPerfil(dataPerfil);
+    } catch (e) { console.error("Erro ao carregar perfil:", e); }
+  };
+
   const loadData = async () => {
     try {
       const [stats, tasks, dataPerfil, cats] = await Promise.all([ 
           getEstatisticas(), getTarefas(), getMe(), getCategorias() 
       ]);
       setEstatisticas(stats); 
+      setPerfil(dataPerfil);
+      setCategorias(cats);
       
-      // Enriquecer tarefas com informações da categoria (nome e cor) para que o MeetingTimer funcione
       const enrichedTasks = (tasks || []).map(t => {
           const cat = cats.find(c => String(c.id) === String(t.categoria_id));
           return {
@@ -539,10 +646,7 @@ export default function GlassDashboard({ onNavigateToProfile, onLogout }) {
               categoria_cor: cat ? cat.cor : t.categoria_cor
           };
       });
-
       setTarefas(enrichedTasks); 
-      setPerfil(dataPerfil);
-      setCategorias(cats);
     } catch (e) { 
         console.error(e); 
     } finally { 
@@ -662,7 +766,15 @@ export default function GlassDashboard({ onNavigateToProfile, onLogout }) {
                     <ChartsView key="v-charts" />
                 )}
                 {activeView === 'categories' && (
-                    <CategoriesView key="v-cats" categorias={categorias} onUpdate={loadData} />
+                    <CategoriesView 
+                        key="v-cats" 
+                        categorias={categorias} 
+                        setCategorias={setCategorias}
+                        onUpdate={loadData} 
+                        loadCategories={loadCategories}
+                        setFiltroCategoria={setFiltroCategoria}
+                        setActiveView={setActiveView}
+                    />
                 )}
                 {activeView === 'settings' && (
                     <SettingsView key="v-sett" perfil={perfil} onLogout={onLogout} />

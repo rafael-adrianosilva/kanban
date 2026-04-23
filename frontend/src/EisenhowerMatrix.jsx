@@ -61,15 +61,9 @@ const TaskCardVisual = React.forwardRef(({ tarefa, index, onUpdate, onEdit, prov
           <h4 style={{ margin: '0 0 0.4rem 0', fontSize: '1.05rem', textDecoration: tarefa.status === 'concluida' ? 'line-through' : 'none', color: 'var(--text-primary)' }}>
             {tarefa.titulo}
           </h4>
-          {tarefa.descricao && (
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '0.8rem', lineHeight: '1.4' }}>{tarefa.descricao}</p>
-          )}
-          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
-            {tarefa.data_limite && (
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                ⏱ {new Date(tarefa.data_limite).toLocaleDateString('pt-BR', {timeZone: 'UTC'})}
-              </span>
-            )}
+
+          {/* Categoria e Tags abaixo do nome */}
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center', marginBottom: '0.6rem' }}>
             {tarefa.categoria_nome && (
                 <span style={{ background: tarefa.categoria_cor, color: 'var(--text-inverse)', padding: '3px 8px', borderRadius: '12px', fontSize: '0.7rem', fontWeight: 600 }}>
                     {tarefa.categoria_nome}
@@ -81,9 +75,21 @@ const TaskCardVisual = React.forwardRef(({ tarefa, index, onUpdate, onEdit, prov
                 </span>
             ))}
           </div>
-          {tarefa.categoria_nome === 'Reunião' && tarefa.data_limite && (
-              <MeetingTimer targetDate={tarefa.data_limite} isConcluida={tarefa.status === 'concluida'} />
+
+          {tarefa.descricao && (
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '0.8rem', lineHeight: '1.4' }}>{tarefa.descricao}</p>
           )}
+          
+          <div style={{ display: 'flex', gap: '0.8rem', flexWrap: 'wrap', alignItems: 'center' }}>
+            {tarefa.data_limite && (
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <Clock size={12} /> {new Date(tarefa.data_limite).toLocaleDateString('pt-BR', {timeZone: 'UTC'})}
+              </span>
+            )}
+            {tarefa.categoria_nome === 'Reunião' && tarefa.data_limite && (
+                <MeetingTimer targetDate={tarefa.data_limite} isConcluida={tarefa.status === 'concluida'} />
+            )}
+          </div>
         </div>
         
         {!isReuniaoConcluida && (
