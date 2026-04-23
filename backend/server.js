@@ -3,6 +3,9 @@ const cors = require('cors');
 const db = require('./database'); // Agora exporta o Firestore
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { admin } = require('./firebase');
+const multer = require('multer');
+const upload = multer({ storage: multer.memoryStorage() });
 
 const app = express();
 const PORT = 3000;
@@ -163,6 +166,44 @@ app.put('/auth/me/avatar', autenticarToken, async (req, res) => {
         res.status(200).json({ mensagem: 'Identidade atualizada com sucesso', foto_avatar });
     } catch (error) {
         res.status(500).json({ erro: 'Erro ao atualizar avatar' });
+    }
+});
+
+app.post('/usuario/avatar-upload', autenticarToken, upload.single('avatar'), async (req, res) => {
+    if (!req.file) return res.status(400).json({ erro: 'Nenhum arquivo enviado' });
+
+    try {
+        const bucket = admin.storage().bucket();
+        const fileName = `avatars/${req.usuarioId}_${Date.now()}_${req.file.originalname}`;
+        const file = bucket.file(fileName);
+
+        const stream = file.createWriteStream({
+            metadata: {
+                contentType: req.file.mimetype,
+            },
+        });
+
+        stream.on('error', (err) => {
+            console.error("Erro no stream de upload:", err);
+            res.status(500).json({ erro: 'Falha no processamento da imagem' });
+        });
+
+        stream.on('finish', async () => {
+            // No Firebase Storage, arquivos não são públicos por padrão. 
+            // Para simplicidade usaremos a URL formatada com alt=media
+            const publicUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(fileName)}?alt=media`;
+            
+            await db.collection('usuarios').doc(req.usuarioId).update({
+                foto_avatar: publicUrl
+            });
+
+            res.status(200).json({ url: publicUrl });
+        });
+
+        stream.end(req.file.buffer);
+    } catch (error) {
+        console.error("Erro no upload de avatar:", error);
+        res.status(500).json({ erro: 'Erro interno ao subir foto' });
     }
 });
 

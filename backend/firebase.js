@@ -17,7 +17,8 @@ if (process.env.FIREBASE_SERVICE_ACCOUNT) {
 
 if (serviceAccount) {
   admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount)
+    credential: admin.credential.cert(serviceAccount),
+    storageBucket: "zengrid-seven.firebasestorage.app"
   });
 }
 
