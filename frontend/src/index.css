@@ -88,8 +88,7 @@ h1, h2, h3, h4, h5, h6 {
   background: rgba(255, 255, 255, 0.55);
 }
 .task-card:hover {
-  translate: 0 -4px;
-  scale: 1.02;
+  transform: translateY(-4px) scale(1.02);
   background: rgba(255, 255, 255, 0.7);
 }
 
@@ -98,6 +97,16 @@ h1, h2, h3, h4, h5, h6 {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes lavaRotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 .lava-effect {
