@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import { updateTarefa, deleteTarefa } from './api';
 import { Check, Trash2, Edit3, Move, ArrowRight } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
@@ -124,12 +125,20 @@ const TaskCardVisual = React.forwardRef(({ tarefa, index, onUpdate, onEdit, prov
 function TaskCard({ tarefa, onUpdate, onEdit, index }) {
   return (
     <Draggable draggableId={tarefa.id.toString()} index={index}>
-        {(provided, snapshot) => (
-           <TaskCardVisual 
-              tarefa={tarefa} index={index} onUpdate={onUpdate} onEdit={onEdit} 
-              provided={provided} snapshot={snapshot} ref={provided.innerRef} 
-           />
-        )}
+        {(provided, snapshot) => {
+           const child = (
+             <TaskCardVisual 
+                tarefa={tarefa} index={index} onUpdate={onUpdate} onEdit={onEdit} 
+                provided={provided} snapshot={snapshot} ref={provided.innerRef} 
+             />
+           );
+
+           if (snapshot.isDragging) {
+             return ReactDOM.createPortal(child, document.body);
+           }
+
+           return child;
+        }}
     </Draggable>
   );
 }
@@ -208,7 +217,7 @@ export default function EisenhowerMatrix({ tarefas: tarefasProp, onUpdate, onEdi
           <div 
               ref={provided.innerRef} 
               {...provided.droppableProps}
-              style={{ flex: 1, minHeight: '100px' }}
+              style={{ flex: 1, minHeight: '100px', overflow: 'visible' }}
           >
               {tasks.map((t, idx) => (
                 <TaskCard key={t.id.toString()} index={idx} tarefa={t} onUpdate={onUpdate} onEdit={onEditTask} />
