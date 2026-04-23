@@ -38,7 +38,7 @@ export default function LoginBoard({ onLoginSuccess }) {
       <motion.div 
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        className="glass-panel" 
+        className="glass-panel-lite" 
         style={{ padding: 'clamp(1.5rem, 8vw, 3rem)', width: '90%', maxWidth: '400px', textAlign: 'center' }}
       >
         <h1 style={{ marginBottom: '0.5rem', fontWeight: 300, letterSpacing: '2px' }}>ZEN <span style={{ fontWeight: 700 }}>GRID</span></h1>

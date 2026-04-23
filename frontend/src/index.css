@@ -26,7 +26,7 @@
   --glass-bg: rgba(255, 255, 255, 0.45); /* Lighter, frostier */
   --glass-border: rgba(255, 255, 255, 0.7);
   --glass-border-hover: rgba(255, 255, 255, 1);
-  --glass-blur: blur(20px); /* Reduced from 40px for better performance */
+  --glass-blur: blur(8px); /* Lowered drastically for performance */
   --glass-shadow: 0 10px 40px 0 rgba(31, 38, 135, 0.08); /* Softer, broader shadow */
 
   /* Input Glass Tokens */
@@ -101,8 +101,22 @@ h1, h2, h3, h4, h5, h6 {
   border: 1px solid var(--glass-border);
   box-shadow: var(--glass-shadow);
   border-radius: var(--radius-lg);
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease, border-color 0.3s ease;
-  will-change: transform, box-shadow;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+
+/* Performant variant for many small cards */
+.glass-panel-lite {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  border-radius: var(--radius-lg);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+
+body.theme-dark .glass-panel-lite {
+  background: rgba(15, 23, 42, 0.8);
 }
 
 @media (max-width: 768px) {

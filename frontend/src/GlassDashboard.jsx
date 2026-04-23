@@ -21,7 +21,7 @@ import {
 /* --- COMPONENTES AUXILIARES --- */
 
 const StatBox = ({ title, value, color }) => (
-  <div className="glass-panel" style={{ padding: '1.5rem', flex: 1, textAlign: 'center', borderTop: `4px solid ${color}` }}>
+  <div className="glass-panel-lite" style={{ padding: '1.5rem', flex: 1, textAlign: 'center', borderTop: `4px solid ${color}` }}>
     <h4 style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginBottom: '0.5rem', fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase' }}>{title}</h4>
     <span className="stat-box-value" style={{ fontSize: '3rem', fontWeight: 700, color: 'var(--text-primary)', display: 'block' }}>{value}</span>
   </div>
@@ -133,7 +133,7 @@ const TasksView = ({ tarefas, onUpdate, onEdit }) => {
             <h2 style={{ marginBottom: '2rem', color: 'var(--text-primary)' }}>Minhas <span style={{ fontWeight: 700 }}>Tarefas</span></h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 {tarefas.sort((a,b) => b.id - a.id).map(t => (
-                    <div key={t.id} className="glass-panel" style={{ padding: '1rem 1.5rem', display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: `6px solid ${getColor(t)}`, flexWrap: 'wrap' }}>
+                    <div key={t.id} className="glass-panel-lite" style={{ padding: '1rem 1.5rem', display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: `6px solid ${getColor(t)}`, flexWrap: 'wrap' }}>
                         <div style={{ flex: '1 1 200px' }}>
                             <h4 style={{ color: 'var(--text-primary)', marginBottom: '0.3rem', fontSize: '1.1rem' }}>{t.titulo}</h4>
                             <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
@@ -216,7 +216,7 @@ const CategoriesView = ({ categorias, setCategorias, onUpdate, loadCategories, s
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             <h2 style={{ marginBottom: '2rem', color: 'var(--text-primary)' }}>Gerenciar <span style={{ fontWeight: 700 }}>Categorias</span></h2>
             
-            <form onSubmit={handleAdd} className="glass-panel" style={{ padding: '2rem', marginBottom: '3rem', display: 'flex', gap: '1rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+            <form onSubmit={handleAdd} className="glass-panel-lite" style={{ padding: '2rem', marginBottom: '3rem', display: 'flex', gap: '1rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
                 <div style={{ flex: 2, minWidth: '200px' }}>
                     <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Nome da Categoria</label>
                     <input type="text" value={novoNome} onChange={(e) => setNovoNome(e.target.value)} placeholder="Ex: Projetos X" required style={{ width: '100%' }} />
@@ -230,7 +230,7 @@ const CategoriesView = ({ categorias, setCategorias, onUpdate, loadCategories, s
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1.5rem' }}>
                 {categorias.map(c => (
-                    <div key={c.id} className="glass-panel" style={{ padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', opacity: c.temp ? 0.6 : 1 }}>
+                    <div key={c.id} className="glass-panel-lite" style={{ padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', opacity: c.temp ? 0.6 : 1 }}>
                         <div 
                             style={{ display: 'flex', alignItems: 'center', gap: '1rem', cursor: 'pointer', flex: 1 }}
                             onClick={() => {
@@ -316,7 +316,7 @@ const ChartsView = () => {
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             <h2 style={{ marginBottom: '2rem', color: 'var(--text-primary)' }}>Análise de <span style={{ fontWeight: 700 }}>Produtividade</span></h2>
 
-            <div className="glass-panel" style={{ padding: '2rem', marginBottom: '2rem' }}>
+            <div className="glass-panel-lite" style={{ padding: '2rem', marginBottom: '2rem' }}>
                 <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem' }}>
                     {['semana', 'mes', 'ano'].map(p => (
                         <button 
@@ -441,7 +441,7 @@ const SettingsView = ({ perfil, onLogout, animacoesQuadrantes, applyAnimacoes })
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem' }}>
                 {/* Aparência */}
-                <div className="glass-panel" style={{ padding: '2rem' }}>
+                <div className="glass-panel-lite" style={{ padding: '2rem' }}>
                     <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}><Palette size={20}/> Personalização</h3>
                     
                     <div style={{ marginBottom: '2rem' }}>
@@ -610,7 +610,7 @@ const SettingsView = ({ perfil, onLogout, animacoesQuadrantes, applyAnimacoes })
                 </div>
 
                 {/* Segurança */}
-                <div className="glass-panel" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                <div className="glass-panel-lite" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                     <div>
                         <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}><Mail size={20}/> Alterar E-mail</h3>
                         <form onSubmit={handleUpdateEmail} style={{ display: 'flex', gap: '0.5rem' }}>

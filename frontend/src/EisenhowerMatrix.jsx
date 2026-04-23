@@ -42,17 +42,17 @@ const TaskCardVisual = React.forwardRef(({ tarefa, index, onUpdate, onEdit, prov
       ref={ref}
       {...provided.draggableProps}
       {...provided.dragHandleProps}
-      className={`glass-panel task-card ${snapshot.isDragging ? "dragging-task" : ""}`}
+      className={`glass-panel-lite task-card ${snapshot.isDragging ? "dragging-task" : ""}`}
       style={{ 
         padding: '1.2rem', 
         marginBottom: '1rem', 
         borderLeft: `6px solid ${getPriorityColor()}`,
         opacity: tarefa.status === 'concluida' && !snapshot.isDragging ? 0.6 : 1,
-        background: snapshot.isDragging ? 'var(--glass-bg)' : 'rgba(255, 255, 255, 0.55)',
+        background: snapshot.isDragging ? 'var(--glass-bg)' : 'rgba(255, 255, 255, 0.7)',
         position: 'relative',
         borderRadius: 'var(--radius-md)',
         border: snapshot.isDragging ? '2px solid var(--accent-color)' : '1px solid transparent',
-        transition: snapshot.isDragging ? 'none' : 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        transition: snapshot.isDragging ? 'none' : 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
         ...provided.draggableProps.style
       }}
     >
@@ -221,22 +221,14 @@ export default function EisenhowerMatrix({ tarefas: tarefasProp, onUpdate, onEdi
     <Droppable droppableId={title}>
      {(provided, snapshot) => (
         <div 
-            className={`glass-panel quadrant-container ${snapshot.isDraggingOver ? 'quadrant-active' : ''} ${animacoesAtivas ? 'animate-glow' : ''}`}
+            className={`glass-panel-lite quadrant-container ${snapshot.isDraggingOver ? 'quadrant-active' : ''} ${animacoesAtivas ? 'animate-glow' : ''}`}
             style={{ 
                 padding: '1.5rem', display: 'flex', flexDirection: 'column', height: '100%', minHeight: '400px',
-                background: 'var(--glass-bg)',
+                background: snapshot.isDraggingOver ? 'rgba(255, 255, 255, 0.2)' : 'var(--glass-bg)',
                 '--glow-color': color,
                 ...provided.droppableProps.style
             }}
         >
-          {/* Lava Lamp Effect Blobs */}
-          {animacoesAtivas && (
-            <div className="lava-lamp-container">
-              <div className="lava-blob" style={{ '--blob-color': color, '--duration': '15s', width: '150px', height: '150px', top: '-20px', left: '-20px' }}></div>
-              <div className="lava-blob" style={{ '--blob-color': color, '--duration': '20s', width: '200px', height: '200px', bottom: '-40px', right: '-40px' }}></div>
-              <div className="lava-blob" style={{ '--blob-color': color, '--duration': '18s', width: '120px', height: '120px', top: '40%', left: '30%' }}></div>
-            </div>
-          )}
 
           <div style={{ marginBottom: '1.5rem', position: 'relative', zIndex: 1 }}>
             <h3 style={{ color: color, display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.2rem', fontWeight: 600 }}>
