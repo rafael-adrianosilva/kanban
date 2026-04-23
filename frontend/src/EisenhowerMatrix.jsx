@@ -5,6 +5,7 @@ import { Check, Trash2, Edit3, Move, ArrowRight, Clock } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import MeetingTimer from './MeetingTimer';
 
+
 const TaskCardVisual = React.forwardRef(({ tarefa, index, onUpdate, onEdit, provided, snapshot }, ref) => {
   const isReuniaoConcluida = tarefa.categoria_nome === 'Reunião' && tarefa.status === 'concluida';
 
@@ -58,7 +59,7 @@ const TaskCardVisual = React.forwardRef(({ tarefa, index, onUpdate, onEdit, prov
         marginBottom: '1rem', 
         borderLeft: `6px solid ${getPriorityColor()}`,
         opacity: tarefa.status === 'concluida' && !snapshot.isDragging ? 0.6 : 1,
-        background: snapshot.isDragging ? 'var(--glass-bg)' : 'rgba(255, 255, 255, 0.7)',
+        background: snapshot.isDragging ? 'var(--glass-bg)' : 'var(--glass-panel-bg)',
         position: 'relative',
         borderRadius: 'var(--radius-md)',
         border: snapshot.isDragging ? '2px solid var(--accent-color)' : '1px solid transparent',
@@ -68,7 +69,13 @@ const TaskCardVisual = React.forwardRef(({ tarefa, index, onUpdate, onEdit, prov
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div style={{ flex: 1, paddingRight: '1rem' }}>
-          <h4 style={{ margin: '0 0 0.4rem 0', fontSize: '1.05rem', textDecoration: tarefa.status === 'concluida' ? 'line-through' : 'none', color: 'var(--text-primary)' }}>
+          <h4 style={{ 
+            margin: '0 0 0.4rem 0', fontSize: '1.1rem', 
+            textDecoration: tarefa.status === 'concluida' ? 'line-through' : 'none', 
+            color: 'var(--text-primary)', 
+            fontWeight: 700,
+            textShadow: '0 1px 2px rgba(0,0,0,0.2)'
+          }}>
             {tarefa.titulo}
           </h4>
 
@@ -92,26 +99,46 @@ const TaskCardVisual = React.forwardRef(({ tarefa, index, onUpdate, onEdit, prov
           
           <div style={{ display: 'flex', gap: '0.8rem', flexWrap: 'wrap', alignItems: 'center' }}>
             {tarefa.data_limite && (
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <Clock size={12} /> {new Date(tarefa.data_limite).toLocaleDateString('pt-BR', {timeZone: 'UTC'})}
+              <span style={{ 
+                fontSize: '0.8rem', color: 'var(--text-primary)', 
+                fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px',
+                opacity: 0.9
+              }}>
+                <Clock size={13} /> {new Date(tarefa.data_limite).toLocaleDateString('pt-BR', {timeZone: 'UTC'})}
               </span>
             )}
             {tarefa.categoria_nome === 'Reunião' && tarefa.data_limite && (
                 <MeetingTimer targetDate={tarefa.data_limite} isConcluida={tarefa.status === 'concluida'} />
             )}
           </div>
+
+          {/* Colaboração: Criador e Editor */}
+          {(tarefa.criado_por_nome || tarefa.editado_por_nome) && (
+              <div style={{ marginTop: '0.8rem', padding: '0.4rem 0', borderTop: '1px solid var(--glass-border)', display: 'flex', gap: '0.6rem', alignItems: 'center', opacity: 0.8 }}>
+                  {tarefa.criado_por_nome && (
+                      <span style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>
+                        ✍️ <b>{tarefa.criado_por_nome}</b>
+                      </span>
+                  )}
+                  {tarefa.editado_por_nome && tarefa.editado_por_nome !== tarefa.criado_por_nome && (
+                      <span style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>
+                        • 🔄 <b>{tarefa.editado_por_nome}</b>
+                      </span>
+                  )}
+              </div>
+          )}
         </div>
         
         {!isReuniaoConcluida && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <button onClick={toggleStatus} style={{ background: tarefa.status === 'concluida' ? 'var(--priority-low)' : 'var(--glass-bg)', border: '1px solid var(--glass-border)', color: tarefa.status === 'concluida' ? 'var(--text-inverse)' : 'var(--text-secondary)', width: '32px', height: '32px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <button onClick={toggleStatus} style={{ background: tarefa.status === 'concluida' ? 'var(--priority-low)' : 'rgba(255,255,255,0.8)', border: '1px solid var(--glass-border)', color: tarefa.status === 'concluida' ? 'var(--text-inverse)' : 'var(--text-secondary)', width: '32px', height: '32px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 5px rgba(0,0,0,0.05)' }}>
                   <Check size={16} />
               </button>
-              <button onClick={() => onEdit(tarefa)} title="Editar" style={{ background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', color: 'var(--text-secondary)', width: '32px', height: '32px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <button onClick={() => onEdit(tarefa)} title="Editar" style={{ background: 'rgba(255,255,255,0.8)', border: '1px solid var(--glass-border)', color: 'var(--text-secondary)', width: '32px', height: '32px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 5px rgba(0,0,0,0.05)' }}>
                   <Edit3 size={15} />
               </button>
               <div style={{ position: 'relative' }}>
-                  <button onClick={() => setShowMoveMenu(!showMoveMenu)} title="Mover para..." style={{ background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', color: 'var(--accent-color)', width: '32px', height: '32px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <button onClick={() => setShowMoveMenu(!showMoveMenu)} title="Mover para..." style={{ background: 'rgba(255,255,255,0.8)', border: '1px solid var(--glass-border)', color: 'var(--accent-color)', width: '32px', height: '32px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 5px rgba(0,0,0,0.05)' }}>
                       <Move size={15} />
                   </button>
                   {showMoveMenu && (

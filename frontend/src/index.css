@@ -37,6 +37,31 @@
   --radius-lg: 24px;
   --radius-md: 16px;
   --radius-sm: 12px;
+
+  /* Biofeedback Colors - Default Cold (Healthy) */
+  --bio-primary: #00f2fe;
+  --bio-secondary: #10b981;
+  --bio-accent: #0ea5e9;
+  
+  /* Adaptive Glass Base (Day) */
+  --glass-blur: 8px;
+  --glass-opacity: 0.45;
+  --sidebar-bg: rgba(255, 255, 255, 0.45);
+  --glass-panel-bg: rgba(255, 255, 255, 0.95); /* Mais branco, conforme a print */
+}
+
+/* Adaptive States */
+body.glass-night {
+  --glass-blur: 24px;
+  --glass-opacity: 0.25;
+  --bg-gradient-start: #020617;
+  --bg-gradient-end: #000000;
+}
+
+body.bio-alert {
+  --bio-primary: #ff0844;
+  --bio-secondary: #f59e0b;
+  --bio-accent: #ef4444;
 }
 
 /* Lava Lamp Effect */
@@ -54,15 +79,16 @@
 
 .lava-blob {
   position: absolute;
-  background: var(--blob-color, var(--accent-color));
-  filter: blur(40px); /* Reduced from 60px */
+  background: var(--blob-color, var(--bio-primary));
+  filter: blur(40px);
   border-radius: 50%;
-  opacity: 0.2;
+  opacity: 0.25;
   animation: lava-move var(--duration, 15s) infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
   will-change: transform;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   transform: translateZ(0);
+  transition: background 2s ease-in-out;
 }
 
 @keyframes lava-move {
@@ -95,13 +121,13 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Base Glassmorphism utility */
 .glass-panel {
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
+  background: rgba(255, 255, 255, var(--glass-opacity));
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
   border: 1px solid var(--glass-border);
   box-shadow: var(--glass-shadow);
   border-radius: var(--radius-lg);
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   will-change: transform;
 }
 
@@ -133,7 +159,6 @@ body.theme-dark .glass-panel-lite {
 /* Specific Task Hover - Bouncing Squircle */
 .task-card {
   border-radius: var(--radius-md);
-  background: rgba(255, 255, 255, 0.55);
 }
 .task-card:hover {
   translate: 0 -4px;
@@ -220,10 +245,10 @@ button:active {
   transform: translateZ(0);
 }
 
-.orb-1 { width: 700px; height: 700px; background: #00f2fe; top: -15%; left: -10%; --duration: 20s; }
-.orb-2 { width: 600px; height: 600px; background: #ff0844; bottom: -10%; right: -5%; --duration: 28s; }
-.orb-3 { width: 500px; height: 500px; background: #10b981; top: 35%; left: 25%; --duration: 24s; }
-.orb-4 { width: 650px; height: 650px; background: #fbbf24; top: -25%; right: 15%; --duration: 32s; }
+.orb-1 { width: 700px; height: 700px; background: var(--bio-primary); top: -15%; left: -10%; --duration: 20s; transition: background 2s ease; }
+.orb-2 { width: 600px; height: 600px; background: var(--bio-secondary); bottom: -10%; right: -5%; --duration: 28s; transition: background 2s ease; }
+.orb-3 { width: 500px; height: 500px; background: var(--bio-accent); top: 35%; left: 25%; --duration: 24s; transition: background 2s ease; }
+.orb-4 { width: 650px; height: 650px; background: var(--bio-primary); top: -25%; right: 15%; --duration: 32s; transition: background 2s ease; }
 
 @keyframes floatOrb {
   0% { transform: translate3d(0, 0, 0) scale(1); }
@@ -233,30 +258,59 @@ button:active {
 }
 
 /* Theme Overrides */
+/* Theme Overrides */
 body.theme-dark {
   --bg-gradient-start: #0f172a;
   --bg-gradient-end: #020617;
   --text-primary: #f8fafc;
   --text-secondary: #94a3b8;
-  --glass-bg: rgba(15, 23, 42, 0.45);
+  --text-inverse: #0f172a;
+  --accent-color: #38bdf8;
+  --accent-hover: #7dd3fc;
+  --glass-bg: rgba(15, 23, 42, 0.65);
   --glass-border: rgba(255, 255, 255, 0.1);
-  --input-bg: rgba(15, 23, 42, 0.6);
-  --input-border: rgba(255, 255, 255, 0.2);
+  --glass-panel-bg: rgba(15, 23, 42, 0.8);
+  --input-bg: rgba(15, 23, 42, 0.8);
+  --input-border: rgba(255, 255, 255, 0.15);
+  --sidebar-bg: rgba(15, 23, 42, 0.8);
 }
 body.theme-dark .mesh-bg { background: #020617; }
 body.theme-dark .orb-1 { background: #3b82f6; }
 body.theme-dark .orb-2 { background: #8b5cf6; }
 body.theme-dark .orb-3 { background: #06b6d4; }
 body.theme-dark .orb-4 { background: #6366f1; }
-body.theme-dark .task-card { background: rgba(30,30,40, 0.55); border-color: rgba(255,255,255,0.05); }
-body.theme-dark .task-card:hover { background: rgba(40,40,50, 0.7); }
+body.theme-dark .task-card { border-color: rgba(255, 255, 255, 0.05); }
 
+body.theme-nature {
+  --bg-gradient-start: #f0fdf4;
+  --bg-gradient-end: #dcfce7;
+  --text-primary: #064e3b;
+  --text-secondary: #065f46;
+  --accent-color: #10b981;
+  --accent-hover: #059669;
+  --glass-bg: rgba(255, 255, 255, 0.5);
+  --glass-panel-bg: rgba(255, 255, 255, 0.95);
+  --glass-border: rgba(16, 185, 129, 0.2);
+  --sidebar-bg: rgba(209, 250, 229, 0.7);
+}
 body.theme-nature .mesh-bg { background: #ecfdf5; }
 body.theme-nature .orb-1 { background: #059669; }
 body.theme-nature .orb-2 { background: #34d399; }
 body.theme-nature .orb-3 { background: #a7f3d0; }
 body.theme-nature .orb-4 { background: #10b981; }
 
+body.theme-sakura {
+  --bg-gradient-start: #fff1f2;
+  --bg-gradient-end: #ffe4e6;
+  --text-primary: #831843;
+  --text-secondary: #9d174d;
+  --accent-color: #ec4899;
+  --accent-hover: #db2777;
+  --glass-bg: rgba(255, 255, 255, 0.5);
+  --glass-panel-bg: rgba(255, 255, 255, 0.95);
+  --glass-border: rgba(236, 72, 153, 0.2);
+  --sidebar-bg: rgba(252, 231, 243, 0.7);
+}
 body.theme-sakura .mesh-bg { background: #fdf2f8; }
 body.theme-sakura .orb-1 { background: #f472b6; }
 body.theme-sakura .orb-2 { background: #fb7185; }
