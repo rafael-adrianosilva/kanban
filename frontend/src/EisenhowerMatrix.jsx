@@ -162,6 +162,8 @@ export default function EisenhowerMatrix({ tarefas, onUpdate, onEditTask }) {
     onUpdate();
   };
 
+  const animacoesAtivas = localStorage.getItem('zengrid_anim_quad') === 'true';
+
   const Quadrant = ({ title, desc, tasks, color }) => (
     <Droppable 
       droppableId={title}
@@ -178,10 +180,11 @@ export default function EisenhowerMatrix({ tarefas, onUpdate, onEditTask }) {
         <div 
             ref={provided.innerRef} 
             {...provided.droppableProps}
-            className={`glass-panel quadrant-container ${snapshot.isDraggingOver ? 'quadrant-active' : ''}`}
+            className={`glass-panel quadrant-container ${snapshot.isDraggingOver ? 'quadrant-active' : ''} ${animacoesAtivas ? 'animate-glow' : ''}`}
             style={{ 
                 padding: '1.5rem', display: 'flex', flexDirection: 'column', height: '100%', minHeight: '400px',
                 background: 'var(--glass-bg)',
+                '--glow-color': color,
                 ...provided.droppableProps.style
             }}
         >

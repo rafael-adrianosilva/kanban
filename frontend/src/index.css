@@ -221,6 +221,40 @@ body.font-mono { font-family: 'Fira Code', monospace; }
 .quadrant-container {
   transition: all 0.3s ease;
   border: 2px dashed transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Animations for Quadrants */
+@keyframes colorGlow {
+  0% { box-shadow: 0 0 5px var(--glow-color); }
+  50% { box-shadow: 0 0 20px var(--glow-color); }
+  100% { box-shadow: 0 0 5px var(--glow-color); }
+}
+
+@keyframes borderRotate {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-glow {
+  animation: colorGlow 3s infinite ease-in-out;
+}
+
+.animate-border-gradient {
+  background: linear-gradient(90deg, var(--glass-border), var(--glow-color), var(--glass-border)) !important;
+  background-size: 200% 200% !important;
+  animation: borderRotate 4s infinite linear !important;
+}
+
+.animate-pulse-subtle {
+  animation: pulseSubtle 4s infinite alternate ease-in-out;
+}
+
+@keyframes pulseSubtle {
+  from { background: var(--glass-bg); }
+  to { background: rgba(var(--accent-rgb, 14, 165, 233), 0.1); }
 }
 
 .quadrant-active {

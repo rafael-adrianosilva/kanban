@@ -316,6 +316,7 @@ const SettingsView = ({ perfil, onLogout }) => {
     const [qMedium, setQMedium] = useState(localStorage.getItem('zengrid_q_medium') || '#f59e0b');
     const [qLow, setQLow] = useState(localStorage.getItem('zengrid_q_low') || '#10b981');
     const [qDone, setQDone] = useState(localStorage.getItem('zengrid_q_done') || '#0ea5e9');
+    const [animacoesQuadrantes, setAnimacoesQuadrantes] = useState(localStorage.getItem('zengrid_anim_quad') === 'true');
 
     const handleUpdateEmail = async (e) => {
         e.preventDefault();
@@ -365,6 +366,12 @@ const SettingsView = ({ perfil, onLogout }) => {
         if (key === 'medium') setQMedium(color);
         if (key === 'low') setQLow(color);
         if (key === 'done') setQDone(color);
+    };
+
+    const applyAnimacoes = (val) => {
+        setAnimacoesQuadrantes(val);
+        localStorage.setItem('zengrid_anim_quad', val);
+        window.dispatchEvent(new Event('storage')); // Trigger update for other components if needed
     };
 
     return (
@@ -455,6 +462,16 @@ const SettingsView = ({ perfil, onLogout }) => {
                                 <input type="color" value={qDone} onChange={(e) => applyQuadrantColor('done', e.target.value)} style={{ width: '40px', height: '40px', padding: 0, border: 'none', cursor: 'pointer' }} />
                                 <span style={{ fontSize: '0.85rem' }}>Concluídas</span>
                             </div>
+                        </div>
+
+                        <div style={{ marginTop: '1.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <input 
+                                type="checkbox" 
+                                checked={animacoesQuadrantes} 
+                                onChange={(e) => applyAnimacoes(e.target.checked)}
+                                style={{ width: '20px', height: '20px', cursor: 'pointer' }} 
+                            />
+                            <span style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>Ativar Animações de Brilho</span>
                         </div>
                     </div>
                 </div>
