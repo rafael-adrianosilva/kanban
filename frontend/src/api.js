@@ -34,6 +34,11 @@ export const login = (email, senha) => apiFetch('/auth/login', {
   body: JSON.stringify({ email, senha }),
 });
 
+export const loginWithGoogle = (token) => apiFetch('/auth/google', {
+  method: 'POST',
+  body: JSON.stringify({ token }),
+});
+
 export const getMe = () => apiFetch('/auth/me');
 export const updateAvatar = (foto_avatar) => apiFetch('/auth/me/avatar', { method: 'PUT', body: JSON.stringify({ foto_avatar }) });
 export const updateEmail = (email) => apiFetch('/auth/me/email', { method: 'PUT', body: JSON.stringify({ email }) });

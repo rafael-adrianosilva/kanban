@@ -75,6 +75,40 @@ app.post('/auth/login', async (req, res) => {
     }
 });
 
+app.post('/auth/google', async (req, res) => {
+    const { token: googleToken } = req.body;
+    const { admin } = require('./firebase');
+
+    try {
+        const decodedToken = await admin.auth().verifyIdToken(googleToken);
+        const { email, name, picture } = decodedToken;
+
+        let userSnapshot = await db.collection('usuarios').where('email', '==', email).get();
+        let usuario;
+
+        if (userSnapshot.empty) {
+            // Criar novo usuário se não existir
+            const userRef = await db.collection('usuarios').add({
+                nome: name,
+                email: email,
+                foto_avatar: picture || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}`,
+                criado_em: new Date().toISOString(),
+                googleUser: true
+            });
+            usuario = { id: userRef.id, nome: name, email: email, foto_avatar: picture };
+        } else {
+            const usuarioDoc = userSnapshot.docs[0];
+            usuario = { id: usuarioDoc.id, ...usuarioDoc.data() };
+        }
+
+        const token = jwt.sign({ id: usuario.id, email: usuario.email }, JWT_SECRET, { expiresIn: '24h' });
+        res.status(200).json({ token, usuario: { id: usuario.id, nome: usuario.nome, email: usuario.email, foto: usuario.foto_avatar } });
+    } catch (error) {
+        console.error("Erro Google Auth:", error);
+        res.status(401).json({ erro: 'Token do Google inválido ou expirado' });
+    }
+});
+
 app.get('/auth/me', autenticarToken, async (req, res) => {
     try {
         const userDoc = await db.collection('usuarios').doc(req.usuarioId).get();
