@@ -26,7 +26,7 @@
   --glass-bg: rgba(255, 255, 255, 0.45); /* Lighter, frostier */
   --glass-border: rgba(255, 255, 255, 0.7);
   --glass-border-hover: rgba(255, 255, 255, 1);
-  --glass-blur: blur(40px); /* Extreme blur for density */
+  --glass-blur: blur(20px); /* Reduced from 40px for better performance */
   --glass-shadow: 0 10px 40px 0 rgba(31, 38, 135, 0.08); /* Softer, broader shadow */
 
   /* Input Glass Tokens */
@@ -55,11 +55,14 @@
 .lava-blob {
   position: absolute;
   background: var(--blob-color, var(--accent-color));
-  filter: blur(60px);
+  filter: blur(40px); /* Reduced from 60px */
   border-radius: 50%;
-  opacity: 0.25;
-  animation: lava-move var(--duration, 15s) infinite alternate cubic-bezier(0.45, 0.05, 0.55, 0.95);
+  opacity: 0.2;
+  animation: lava-move var(--duration, 15s) infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
   will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: translateZ(0);
 }
 
 @keyframes lava-move {
@@ -194,10 +197,13 @@ button:active {
 .orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(100px);
-  opacity: 0.5;
-  animation: floatOrb var(--duration, 25s) infinite alternate cubic-bezier(0.45, 0.05, 0.55, 0.95);
+  filter: blur(60px); /* Reduced from 100px */
+  opacity: 0.4;
+  animation: floatOrb var(--duration, 25s) infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
   will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: translateZ(0);
 }
 
 .orb-1 { width: 700px; height: 700px; background: #00f2fe; top: -15%; left: -10%; --duration: 20s; }
