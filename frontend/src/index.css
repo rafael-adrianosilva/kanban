@@ -94,10 +94,64 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* Animations */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(15px); }
-  to { opacity: 1; transform: translateY(0); }
+@keyframes lavaAnimation {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
+
+.lava-effect {
+  background-size: 200% 200% !important;
+  animation: lavaAnimation 8s ease infinite !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.lava-effect::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at center, var(--lava-color, transparent) 0%, transparent 70%);
+  opacity: 0.4;
+  animation: lavaRotate 12s linear infinite;
+  pointer-events: none;
+}
+
+.quadrant-lava {
+  position: relative;
+  overflow: hidden;
+  background: var(--glass-bg) !important;
+}
+
+.quadrant-lava::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    transparent 0%,
+    rgba(var(--lava-color-rgb), 0.05) 25%,
+    transparent 50%,
+    rgba(var(--lava-color-rgb), 0.05) 75%,
+    transparent 100%
+  );
+  background-size: 400% 400%;
+  animation: lavaAnimation 15s ease infinite;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Utilitário para converter cores hex para RGB para usar no alpha do lava */
+.q-urgent { --lava-color-rgb: 239, 68, 68; }
+.q-medium { --lava-color-rgb: 245, 158, 11; }
+.q-low { --lava-color-rgb: 16, 185, 129; }
+.q-done { --lava-color-rgb: 14, 165, 233; }
 
 .animate-fade-in {
   animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;

@@ -522,28 +522,34 @@ const SettingsView = ({ perfil, onLogout }) => {
                                 { key: 'low', label: 'Delegar', icon: '📋', value: qLow, setter: setQLow },
                                 { key: 'done', label: 'Concluídas', icon: '✅', value: qDone, setter: setQDone },
                             ].map(q => (
-                                <label key={q.key} style={{
+                                <label key={q.key} 
+                                className="lava-effect"
+                                style={{
                                     position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.6rem',
                                     padding: '1.2rem 0.8rem', borderRadius: '16px', cursor: 'pointer',
-                                    background: `linear-gradient(135deg, ${q.value}22, ${q.value}08)`,
+                                    background: `linear-gradient(135deg, ${q.value}, ${q.value}dd, ${q.value}aa)`,
                                     border: `2px solid ${q.value}44`,
                                     transition: 'all 0.3s ease',
+                                    '--lava-color': q.value
                                 }}
-                                onMouseOver={(e) => { e.currentTarget.style.borderColor = q.value; e.currentTarget.style.boxShadow = `0 4px 20px ${q.value}33`; }}
+                                onMouseOver={(e) => { e.currentTarget.style.borderColor = q.value; e.currentTarget.style.boxShadow = `0 8px 25px ${q.value}55`; }}
                                 onMouseOut={(e) => { e.currentTarget.style.borderColor = `${q.value}44`; e.currentTarget.style.boxShadow = 'none'; }}
                                 >
                                     <div style={{
-                                        width: '36px', height: '36px', borderRadius: '50%', background: q.value,
-                                        boxShadow: `0 4px 15px ${q.value}55`,
-                                        transition: 'all 0.3s ease',
-                                    }} />
-                                    <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-primary)', textAlign: 'center', lineHeight: '1.2' }}>
-                                        {q.icon} {q.label}
+                                        width: '40px', height: '40px', borderRadius: '50%', background: '#fff',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem',
+                                        boxShadow: `0 4px 15px rgba(0,0,0,0.1)`,
+                                        zIndex: 2
+                                    }}>
+                                        {q.icon}
+                                    </div>
+                                    <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#fff', textAlign: 'center', lineHeight: '1.2', textShadow: '0 2px 4px rgba(0,0,0,0.2)', zIndex: 2 }}>
+                                        {q.label}
                                     </span>
                                     <input 
                                         type="color" value={q.value} 
                                         onChange={(e) => applyQuadrantColor(q.key, e.target.value)} 
-                                        style={{ position: 'absolute', inset: 0, opacity: 0, width: '100%', height: '100%', cursor: 'pointer' }} 
+                                        style={{ position: 'absolute', inset: 0, opacity: 0, width: '100%', height: '100%', cursor: 'pointer', zIndex: 3 }} 
                                     />
                                 </label>
                             ))}
