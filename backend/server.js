@@ -248,7 +248,9 @@ app.put('/auth/me/senha', autenticarToken, async (req, res) => {
 app.get('/categorias', autenticarToken, async (req, res) => {
     try {
         const userDoc = await db.collection('usuarios').doc(req.usuarioId).get();
+        if (!userDoc.exists) return res.status(404).json({ erro: 'Usuário não encontrado' });
         const userEmail = userDoc.data()?.email;
+        if (!userEmail) return res.status(400).json({ erro: 'E-mail do usuário não encontrado' });
 
         // Buscar categorias do usuário + categorias do sistema + categorias onde é colaborador
         const snapshotUser = await db.collection('categorias').where('usuario_id', '==', req.usuarioId).get();
@@ -268,8 +270,8 @@ app.get('/categorias', autenticarToken, async (req, res) => {
         
         res.status(200).json(todas);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ erro: 'Erro ao buscar categorias' });
+        console.error('Erro em GET /categorias:', error);
+        res.status(500).json({ erro: 'Erro ao buscar categorias', detalhes: error.message });
     }
 });
 
@@ -363,7 +365,9 @@ app.get('/tarefas', autenticarToken, async (req, res) => {
         
         // Buscar categorias onde o usuário é colaborador para pegar as tarefas delas
         const userDoc = await db.collection('usuarios').doc(req.usuarioId).get();
+        if (!userDoc.exists) return res.status(404).json({ erro: 'Usuário não encontrado no banco' });
         const userEmail = userDoc.data()?.email;
+        if (!userEmail) return res.status(400).json({ erro: 'E-mail do usuário não identificado' });
         const snapshotSharedCats = await db.collection('categorias').where('colaboradores', 'array_contains', userEmail).get();
         const sharedCatIds = snapshotSharedCats.docs.map(doc => doc.id);
 
@@ -392,8 +396,8 @@ app.get('/tarefas', autenticarToken, async (req, res) => {
 
         res.status(200).json(tarefas);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ erro: 'Erro ao buscar tarefas' });
+        console.error('Erro em GET /tarefas:', error);
+        res.status(500).json({ erro: 'Erro ao buscar tarefas', detalhes: error.message });
     }
 });
 
