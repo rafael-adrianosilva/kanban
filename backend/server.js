@@ -333,6 +333,10 @@ app.delete('/tarefas/:id', autenticarToken, async (req, res) => {
     }
 });
 
-app.listen(PORT, () => {
-    console.log(`API Zen Grid Multi-Tag/Perfil rodando na porta ${PORT}`);
-});
+if (!process.env.VERCEL) {
+    app.listen(PORT, () => {
+        console.log(`API Zen Grid Multi-Tag/Perfil rodando na porta ${PORT}`);
+    });
+}
+
+module.exports = app;

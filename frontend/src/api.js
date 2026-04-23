@@ -1,4 +1,6 @@
-const API_URL = 'http://localhost:3000';
+const API_URL = window.location.hostname === 'localhost'
+  ? 'http://localhost:3000'
+  : ''; // No Vercel, as rotas serão relativas se usarmos rewrites ou se a API estiver no mesmo domínio
 
 export const apiFetch = async (endpoint, options = {}) => {
   const token = localStorage.getItem('zengrid_token');
