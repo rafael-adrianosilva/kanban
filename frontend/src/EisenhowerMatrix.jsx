@@ -258,7 +258,8 @@ export default function EisenhowerMatrix({ tarefas: tarefasProp, onUpdate, onEdi
         </div>
       )}
     </Droppable>
-  );
+    );
+  };
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
