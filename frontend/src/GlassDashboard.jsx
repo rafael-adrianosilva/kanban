@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { 
     getEstatisticas, getTarefas, addTarefa, getMe, updateTarefa, deleteTarefa,
     getCategorias, addCategoria, deleteCategoria, updateEmail, updateSenha,
-    getHistoricoEstatisticas, uploadAvatar
+    getHistoricoEstatisticas
 } from './api';
 import EisenhowerMatrix from './EisenhowerMatrix';
 import TaskEditModal from './TaskEditModal';
@@ -11,7 +11,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
     Filter, Home, CheckSquare, Layers, Settings, Plus, Calendar, Clock, 
     Trash2, Edit3, Check, Save, Palette, Type, Mail, Lock, LogOut, BarChart2,
-    Menu, X, Camera
+    Menu, X
 } from 'lucide-react';
 import { 
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
@@ -138,22 +138,7 @@ const TasksView = ({ tarefas, onUpdate, onEdit }) => {
                             <h4 style={{ color: 'var(--text-primary)', marginBottom: '0.3rem', fontSize: '1.1rem' }}>{t.titulo}</h4>
                             <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
                                 <span style={{ fontSize: '0.75rem', fontWeight: 700, color: getColor(t), textTransform: 'uppercase', letterSpacing: '0.5px' }}>{getLabel(t)}</span>
-                                {t.data_limite && (
-                                    <span style={{ 
-                                        fontSize: '0.75rem', 
-                                        color: (t.status !== 'concluida' && new Date(t.data_limite) < new Date()) ? '#ef4444' : 'var(--text-secondary)',
-                                        fontWeight: (t.status !== 'concluida' && new Date(t.data_limite) < new Date()) ? 700 : 400,
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '4px',
-                                        background: (t.status !== 'concluida' && new Date(t.data_limite) < new Date()) ? 'rgba(239, 68, 68, 0.1)' : 'transparent',
-                                        padding: (t.status !== 'concluida' && new Date(t.data_limite) < new Date()) ? '2px 8px' : '0',
-                                        borderRadius: '4px'
-                                    }}>
-                                        <Clock size={12} /> {new Date(t.data_limite).toLocaleDateString('pt-BR', {timeZone:'UTC'})}
-                                        {t.status !== 'concluida' && new Date(t.data_limite) < new Date() && " (ATRASADA)"}
-                                    </span>
-                                )}
+                                {t.data_limite && <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>⏱ {new Date(t.data_limite).toLocaleDateString('pt-BR', {timeZone:'UTC'})}</span>}
                                 {t.categoria_nome === 'Reunião' && t.data_limite && <MeetingTimer targetDate={t.data_limite} />}
                             </div>
                         </div>
@@ -383,38 +368,16 @@ const ChartsView = () => {
 };
 
 // 4. Configurações View
-const SettingsView = ({ perfil, onLogout, animacoesQuadrantes, applyAnimacoes, onUpdateProfile }) => {
+const SettingsView = ({ perfil, onLogout, animacoesQuadrantes, applyAnimacoes }) => {
     const [email, setEmail] = useState(perfil?.email || '');
     const [senhaAtual, setSenhaAtual] = useState('');
     const [novaSenha, setNovaSenha] = useState('');
     const [tema, setTema] = useState(localStorage.getItem('zengrid_tema') || 'theme-original');
     const [fonte, setFonte] = useState(localStorage.getItem('zengrid_fonte') || 'font-inter');
-    const [uploadingAvatar, setUploadingAvatar] = useState(false);
     
     // Novas configs de gráfico
     const [chartColor, setChartColor] = useState(localStorage.getItem('zengrid_chart_color') || '#0ea5e9');
     const [chartStyle, setChartStyle] = useState(localStorage.getItem('zengrid_chart_style') || 'column');
-
-    const handleAvatarUpload = async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        if (file.size > 2 * 1024 * 1024) {
-            alert('A imagem deve ter no máximo 2MB');
-            return;
-        }
-
-        setUploadingAvatar(true);
-        try {
-            await uploadAvatar(file);
-            alert('Foto de perfil atualizada!');
-            if (onUpdateProfile) onUpdateProfile();
-        } catch (err) {
-            alert(err.message || 'Falha no upload');
-        } finally {
-            setUploadingAvatar(false);
-        }
-    };
 
     // Quadrant Colors
     const [qUrgent, setQUrgent] = useState(localStorage.getItem('zengrid_q_urgent') || '#ef4444');
@@ -649,40 +612,6 @@ const SettingsView = ({ perfil, onLogout, animacoesQuadrantes, applyAnimacoes, o
                 {/* Segurança */}
                 <div className="glass-panel-lite" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                     <div>
-                        <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}><Camera size={20}/> Foto de Perfil</h3>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-                            <img 
-                                src={perfil?.foto_avatar} 
-                                alt="Avatar" 
-                                style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--accent-color)', background: 'var(--glass-bg)' }} 
-                            />
-                            <div style={{ flex: 1 }}>
-                                <input 
-                                    type="file" 
-                                    accept="image/*" 
-                                    onChange={handleAvatarUpload} 
-                                    id="avatar-input" 
-                                    style={{ display: 'none' }} 
-                                />
-                                <label 
-                                    htmlFor="avatar-input" 
-                                    style={{ 
-                                        display: 'inline-block', padding: '0.8rem 1.5rem', background: 'var(--glass-bg)', 
-                                        border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-sm)', 
-                                        cursor: 'pointer', fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)',
-                                        transition: 'all 0.2s'
-                                    }}
-                                    onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.6)'}
-                                    onMouseOut={(e) => e.currentTarget.style.background = 'var(--glass-bg)'}
-                                >
-                                    {uploadingAvatar ? 'Subindo...' : 'Escolher Foto'}
-                                </label>
-                                <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>PNG, JPG ou GIF. Máx 2MB.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div style={{ borderTop: '1px solid var(--glass-border)', paddingTop: '2rem' }}>
                         <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}><Mail size={20}/> Alterar E-mail</h3>
                         <form onSubmit={handleUpdateEmail} style={{ display: 'flex', gap: '0.5rem' }}>
                             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} style={{ flex: 1 }} />
@@ -928,9 +857,6 @@ export default function GlassDashboard({ onNavigateToProfile, onLogout }) {
                         animacoesQuadrantes={animacoesQuadrantes}
                         setAnimacoesQuadrantes={setAnimacoesQuadrantes}
                         applyAnimacoes={applyAnimacoes}
-                        onUpdateProfile={loadData}
-                        cameraIcon={Camera}
-                        uploadAvatar={uploadAvatar}
                     />
                 )}
             </AnimatePresence>

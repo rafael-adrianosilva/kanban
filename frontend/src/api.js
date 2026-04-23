@@ -15,20 +15,10 @@ export const apiFetch = async (endpoint, options = {}) => {
     headers,
   });
 
-  const responseText = await response.text();
-  let data = null;
-  
-  try {
-    if (response.status !== 204 && responseText) {
-      data = JSON.parse(responseText);
-    }
-  } catch (e) {
-    // Se não for JSON, provavelmente é um erro do servidor (HTML/Texto)
-    throw new Error(`Resposta inválida do servidor (não JSON): ${responseText.substring(0, 100)}...`);
-  }
-  
+  const data = response.status === 204 ? null : await response.json();
+
   if (!response.ok) {
-    throw new Error(data?.erro || `Erro na requisição (${response.status}): ${responseText.substring(0, 50)}`);
+    throw new Error(data?.erro || 'Erro na requisição');
   }
 
   return data;
@@ -50,25 +40,6 @@ export const loginWithGoogle = (token) => apiFetch('/auth/google', {
 });
 
 export const getMe = () => apiFetch('/auth/me');
-
-export const uploadAvatar = async (file) => {
-  const formData = new FormData();
-  formData.append('avatar', file);
-  
-  const token = localStorage.getItem('zengrid_token');
-  const response = await fetch(`${API_URL}/usuario/avatar-upload`, {
-    method: 'POST',
-    headers: {
-      ...(token && { Authorization: `Bearer ${token}` }),
-    },
-    body: formData,
-  });
-
-  const data = await response.json();
-  if (!response.ok) throw new Error(data?.erro || 'Erro no upload');
-  return data;
-};
-
 export const updateAvatar = (foto_avatar) => apiFetch('/auth/me/avatar', { method: 'PUT', body: JSON.stringify({ foto_avatar }) });
 export const updateEmail = (email) => apiFetch('/auth/me/email', { method: 'PUT', body: JSON.stringify({ email }) });
 export const updateSenha = (senha_atual, nova_senha) => apiFetch('/auth/me/senha', { method: 'PUT', body: JSON.stringify({ senha_atual, nova_senha }) });

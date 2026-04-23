@@ -82,20 +82,8 @@ const TaskCardVisual = React.forwardRef(({ tarefa, index, onUpdate, onEdit, prov
           
           <div style={{ display: 'flex', gap: '0.8rem', flexWrap: 'wrap', alignItems: 'center' }}>
             {tarefa.data_limite && (
-              <span style={{ 
-                fontSize: '0.75rem', 
-                color: (tarefa.status !== 'concluida' && new Date(tarefa.data_limite) < new Date()) ? '#ef4444' : 'var(--text-secondary)', 
-                fontWeight: (tarefa.status !== 'concluida' && new Date(tarefa.data_limite) < new Date()) ? 700 : 500, 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: '4px',
-                background: (tarefa.status !== 'concluida' && new Date(tarefa.data_limite) < new Date()) ? 'rgba(239, 68, 68, 0.1)' : 'transparent',
-                padding: (tarefa.status !== 'concluida' && new Date(tarefa.data_limite) < new Date()) ? '2px 8px' : '0',
-                borderRadius: '4px'
-              }}>
-                <Clock size={12} /> 
-                {new Date(tarefa.data_limite).toLocaleDateString('pt-BR', {timeZone: 'UTC'})}
-                {tarefa.status !== 'concluida' && new Date(tarefa.data_limite) < new Date() && " (ATRASADA)"}
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <Clock size={12} /> {new Date(tarefa.data_limite).toLocaleDateString('pt-BR', {timeZone: 'UTC'})}
               </span>
             )}
             {tarefa.categoria_nome === 'Reunião' && tarefa.data_limite && (

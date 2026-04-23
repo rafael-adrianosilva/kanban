@@ -15,17 +15,12 @@ if (process.env.FIREBASE_SERVICE_ACCOUNT) {
   }
 }
 
-if (serviceAccount && admin.apps.length === 0) {
+if (serviceAccount) {
   admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    storageBucket: "zengrid-seven.firebasestorage.app"
+    credential: admin.credential.cert(serviceAccount)
   });
 }
 
-const db = admin.apps.length > 0 ? admin.firestore() : null;
-
-if (!db) {
-  console.error("ERRO CRÍTICO: Firebase não foi inicializado. Verifique FIREBASE_SERVICE_ACCOUNT.");
-}
+const db = admin.firestore();
 
 module.exports = { admin, db };
