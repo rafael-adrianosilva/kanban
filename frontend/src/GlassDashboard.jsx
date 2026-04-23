@@ -512,34 +512,106 @@ const SettingsView = ({ perfil, onLogout }) => {
                     </div>
 
                     <div style={{ marginTop: '2rem' }}>
-                        <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>Cores dos Quadrantes</p>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                <input type="color" value={qUrgent} onChange={(e) => applyQuadrantColor('urgent', e.target.value)} style={{ width: '40px', height: '40px', padding: 0, border: 'none', cursor: 'pointer' }} />
-                                <span style={{ fontSize: '0.85rem' }}>Fazer Agora</span>
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                <input type="color" value={qMedium} onChange={(e) => applyQuadrantColor('medium', e.target.value)} style={{ width: '40px', height: '40px', padding: 0, border: 'none', cursor: 'pointer' }} />
-                                <span style={{ fontSize: '0.85rem' }}>Agendar / Focar</span>
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                <input type="color" value={qLow} onChange={(e) => applyQuadrantColor('low', e.target.value)} style={{ width: '40px', height: '40px', padding: 0, border: 'none', cursor: 'pointer' }} />
-                                <span style={{ fontSize: '0.85rem' }}>Delegar / Depois</span>
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                <input type="color" value={qDone} onChange={(e) => applyQuadrantColor('done', e.target.value)} style={{ width: '40px', height: '40px', padding: 0, border: 'none', cursor: 'pointer' }} />
-                                <span style={{ fontSize: '0.85rem' }}>Concluídas</span>
-                            </div>
+                        <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '1.2rem' }}>Cores dos Quadrantes</p>
+                        
+                        {/* Quadrant Color Cards */}
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem', marginBottom: '1.5rem' }}>
+                            {[
+                                { key: 'urgent', label: 'Fazer Agora', icon: '🔥', value: qUrgent, setter: setQUrgent },
+                                { key: 'medium', label: 'Agendar', icon: '📅', value: qMedium, setter: setQMedium },
+                                { key: 'low', label: 'Delegar', icon: '📋', value: qLow, setter: setQLow },
+                                { key: 'done', label: 'Concluídas', icon: '✅', value: qDone, setter: setQDone },
+                            ].map(q => (
+                                <label key={q.key} style={{
+                                    position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.6rem',
+                                    padding: '1.2rem 0.8rem', borderRadius: '16px', cursor: 'pointer',
+                                    background: `linear-gradient(135deg, ${q.value}22, ${q.value}08)`,
+                                    border: `2px solid ${q.value}44`,
+                                    transition: 'all 0.3s ease',
+                                }}
+                                onMouseOver={(e) => { e.currentTarget.style.borderColor = q.value; e.currentTarget.style.boxShadow = `0 4px 20px ${q.value}33`; }}
+                                onMouseOut={(e) => { e.currentTarget.style.borderColor = `${q.value}44`; e.currentTarget.style.boxShadow = 'none'; }}
+                                >
+                                    <div style={{
+                                        width: '36px', height: '36px', borderRadius: '50%', background: q.value,
+                                        boxShadow: `0 4px 15px ${q.value}55`,
+                                        transition: 'all 0.3s ease',
+                                    }} />
+                                    <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-primary)', textAlign: 'center', lineHeight: '1.2' }}>
+                                        {q.icon} {q.label}
+                                    </span>
+                                    <input 
+                                        type="color" value={q.value} 
+                                        onChange={(e) => applyQuadrantColor(q.key, e.target.value)} 
+                                        style={{ position: 'absolute', inset: 0, opacity: 0, width: '100%', height: '100%', cursor: 'pointer' }} 
+                                    />
+                                </label>
+                            ))}
                         </div>
 
-                        <div style={{ marginTop: '1.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <input 
-                                type="checkbox" 
-                                checked={animacoesQuadrantes} 
-                                onChange={(e) => applyAnimacoes(e.target.checked)}
-                                style={{ width: '20px', height: '20px', cursor: 'pointer' }} 
-                            />
-                            <span style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>Ativar Animações de Brilho</span>
+                        {/* Preset Palettes */}
+                        <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.8rem', fontWeight: 500 }}>Paletas Prontas</p>
+                        <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
+                            {[
+                                { name: 'Padrão', colors: ['#ef4444', '#f59e0b', '#10b981', '#0ea5e9'] },
+                                { name: 'Neon', colors: ['#ff006e', '#fb5607', '#06d6a0', '#3a86ff'] },
+                                { name: 'Pastel', colors: ['#e07a5f', '#f2cc8f', '#81b29a', '#3d405b'] },
+                                { name: 'Oceano', colors: ['#d62828', '#f77f00', '#2a9d8f', '#264653'] },
+                                { name: 'Roxo', colors: ['#e63946', '#a855f7', '#22d3ee', '#6366f1'] },
+                            ].map(p => (
+                                <button 
+                                    key={p.name}
+                                    onClick={() => {
+                                        applyQuadrantColor('urgent', p.colors[0]);
+                                        applyQuadrantColor('medium', p.colors[1]);
+                                        applyQuadrantColor('low', p.colors[2]);
+                                        applyQuadrantColor('done', p.colors[3]);
+                                    }}
+                                    title={p.name}
+                                    style={{
+                                        display: 'flex', gap: '3px', padding: '6px 10px', borderRadius: '20px',
+                                        border: '1px solid var(--glass-border)', background: 'var(--glass-bg)',
+                                        cursor: 'pointer', alignItems: 'center', transition: 'all 0.2s',
+                                    }}
+                                    onMouseOver={(e) => { e.currentTarget.style.transform = 'scale(1.05)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)'; }}
+                                    onMouseOut={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = 'none'; }}
+                                >
+                                    {p.colors.map((c, i) => (
+                                        <div key={i} style={{ width: '14px', height: '14px', borderRadius: '50%', background: c }} />
+                                    ))}
+                                    <span style={{ fontSize: '0.7rem', marginLeft: '6px', color: 'var(--text-secondary)', fontWeight: 500 }}>{p.name}</span>
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Toggle Animações */}
+                        <div 
+                            onClick={() => applyAnimacoes(!animacoesQuadrantes)}
+                            style={{ 
+                                display: 'flex', alignItems: 'center', justifyContent: 'space-between', 
+                                padding: '1rem', borderRadius: '12px', cursor: 'pointer',
+                                background: animacoesQuadrantes ? 'rgba(14, 165, 233, 0.08)' : 'transparent',
+                                border: `1px solid ${animacoesQuadrantes ? 'var(--accent-color)' : 'var(--glass-border)'}`,
+                                transition: 'all 0.3s ease',
+                            }}
+                        >
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <span style={{ fontSize: '1.1rem' }}>✨</span>
+                                <span style={{ fontSize: '0.9rem', color: 'var(--text-primary)', fontWeight: 500 }}>Animações de Brilho</span>
+                            </div>
+                            <div style={{
+                                width: '44px', height: '24px', borderRadius: '12px',
+                                background: animacoesQuadrantes ? 'var(--accent-color)' : 'var(--glass-border)',
+                                position: 'relative', transition: 'background 0.3s ease',
+                            }}>
+                                <div style={{
+                                    width: '18px', height: '18px', borderRadius: '50%', background: 'white',
+                                    position: 'absolute', top: '3px',
+                                    left: animacoesQuadrantes ? '23px' : '3px',
+                                    transition: 'left 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                    boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                                }} />
+                            </div>
                         </div>
                     </div>
                 </div>
