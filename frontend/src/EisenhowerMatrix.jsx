@@ -217,24 +217,18 @@ export default function EisenhowerMatrix({ tarefas: tarefasProp, onUpdate, onEdi
 
   const animacoesAtivas = localStorage.getItem('zengrid_anim_quad') === 'true';
 
-  const Quadrant = ({ title, desc, tasks, color }) => {
-    const lavaClass = title === "Fazer Agora" ? "q-urgent" : 
-                      title === "Agendar / Focar" ? "q-medium" : 
-                      title === "Delegar / Depois" ? "q-low" : "q-done";
-
-    return (
-      <Droppable droppableId={title}>
-       {(provided, snapshot) => (
-          <div 
-              className={`glass-panel quadrant-container ${snapshot.isDraggingOver ? 'quadrant-active' : ''} ${animacoesAtivas ? `animate-glow quadrant-lava ${lavaClass}` : ''}`}
-              style={{ 
-                  padding: '1.5rem', display: 'flex', flexDirection: 'column', height: '100%', minHeight: '400px',
-                  background: 'var(--glass-bg)',
-                  '--glow-color': color,
-                  '--lava-color': color, // Para compatibilidade com a classe base se necessário
-                  ...provided.droppableProps.style
-              }}
-          >
+  const Quadrant = ({ title, desc, tasks, color }) => (
+    <Droppable droppableId={title}>
+     {(provided, snapshot) => (
+        <div 
+            className={`glass-panel quadrant-container ${snapshot.isDraggingOver ? 'quadrant-active' : ''} ${animacoesAtivas ? 'animate-glow' : ''}`}
+            style={{ 
+                padding: '1.5rem', display: 'flex', flexDirection: 'column', height: '100%', minHeight: '400px',
+                background: 'var(--glass-bg)',
+                '--glow-color': color,
+                ...provided.droppableProps.style
+            }}
+        >
           <div style={{ marginBottom: '1.5rem' }}>
             <h3 style={{ color: color, display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.2rem', fontWeight: 600 }}>
               <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: color, boxShadow: `0 0 10px ${color}` }} />
@@ -258,8 +252,7 @@ export default function EisenhowerMatrix({ tarefas: tarefasProp, onUpdate, onEdi
         </div>
       )}
     </Droppable>
-    );
-  };
+  );
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
