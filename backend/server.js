@@ -45,7 +45,9 @@ const inicializarCategoriasSistema = async () => {
     }
 };
 
-inicializarCategoriasSistema();
+if (db) {
+    inicializarCategoriasSistema();
+}
 
 const autenticarToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
@@ -473,6 +475,13 @@ app.delete('/tarefas/:id', autenticarToken, async (req, res) => {
     } catch (error) {
         res.status(500).json({ erro: 'Erro ao deletar tarefa' });
     }
+// Middleware de erro global
+app.use((err, req, res, next) => {
+    console.error("Erro não tratado:", err);
+    res.status(500).json({ 
+        erro: 'Ocorreu um erro interno no servidor', 
+        detalhes: err.message 
+    });
 });
 
 if (!process.env.VERCEL) {
