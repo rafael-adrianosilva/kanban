@@ -31,6 +31,10 @@
       "destination": "api/index.js"
     },
     {
+      "source": "/usuario(.*)",
+      "destination": "api/index.js"
+    },
+    {
       "source": "/(.*)",
       "destination": "frontend/$1"
     }

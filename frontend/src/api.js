@@ -15,10 +15,20 @@ export const apiFetch = async (endpoint, options = {}) => {
     headers,
   });
 
-  const data = response.status === 204 ? null : await response.json();
-
+  const responseText = await response.text();
+  let data = null;
+  
+  try {
+    if (response.status !== 204 && responseText) {
+      data = JSON.parse(responseText);
+    }
+  } catch (e) {
+    // Se não for JSON, provavelmente é um erro do servidor (HTML/Texto)
+    throw new Error(`Resposta inválida do servidor (não JSON): ${responseText.substring(0, 100)}...`);
+  }
+  
   if (!response.ok) {
-    throw new Error(data?.erro || 'Erro na requisição');
+    throw new Error(data?.erro || `Erro na requisição (${response.status}): ${responseText.substring(0, 50)}`);
   }
 
   return data;
