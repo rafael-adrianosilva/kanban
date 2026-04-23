@@ -39,7 +39,7 @@ const TaskCardVisual = React.forwardRef(({ tarefa, index, onUpdate, onEdit, prov
       ref={ref}
       {...provided.draggableProps}
       {...provided.dragHandleProps}
-      className={snapshot.isDragging ? "dragging-task" : "glass-panel task-card"}
+      className={`glass-panel task-card ${snapshot.isDragging ? "dragging-task" : ""}`}
       style={{ 
         padding: '1.2rem', 
         marginBottom: '1rem', 
