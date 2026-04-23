@@ -13,12 +13,14 @@ app.use(express.json());
 
 // Endpoint temporário de diagnóstico - REMOVER DEPOIS
 app.get('/debug', (req, res) => {
+    const { initError } = require('./firebase');
     const admin = require('firebase-admin');
     res.json({
         hasEnvVar: !!process.env.FIREBASE_SERVICE_ACCOUNT,
         envVarLength: process.env.FIREBASE_SERVICE_ACCOUNT ? process.env.FIREBASE_SERVICE_ACCOUNT.length : 0,
         adminApps: admin.apps.length,
-        adminAppName: admin.apps.length > 0 ? admin.apps[0].name : 'NONE',
+        dbReady: db !== null,
+        initError: initError || null,
     });
 });
 
