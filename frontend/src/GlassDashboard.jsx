@@ -311,6 +311,12 @@ const SettingsView = ({ perfil, onLogout }) => {
     const [chartColor, setChartColor] = useState(localStorage.getItem('zengrid_chart_color') || '#0ea5e9');
     const [chartStyle, setChartStyle] = useState(localStorage.getItem('zengrid_chart_style') || 'column');
 
+    // Quadrant Colors
+    const [qUrgent, setQUrgent] = useState(localStorage.getItem('zengrid_q_urgent') || '#ef4444');
+    const [qMedium, setQMedium] = useState(localStorage.getItem('zengrid_q_medium') || '#f59e0b');
+    const [qLow, setQLow] = useState(localStorage.getItem('zengrid_q_low') || '#10b981');
+    const [qDone, setQDone] = useState(localStorage.getItem('zengrid_q_done') || '#0ea5e9');
+
     const handleUpdateEmail = async (e) => {
         e.preventDefault();
         try {
@@ -350,6 +356,15 @@ const SettingsView = ({ perfil, onLogout }) => {
     const applyChartStyle = (s) => {
         setChartStyle(s);
         localStorage.setItem('zengrid_chart_style', s);
+    };
+
+    const applyQuadrantColor = (key, color) => {
+        localStorage.setItem(`zengrid_q_${key}`, color);
+        document.documentElement.style.setProperty(`--priority-${key === 'urgent' ? 'urgent' : key === 'medium' ? 'medium' : key === 'low' ? 'low' : 'done'}`, color);
+        if (key === 'urgent') setQUrgent(color);
+        if (key === 'medium') setQMedium(color);
+        if (key === 'low') setQLow(color);
+        if (key === 'done') setQDone(color);
     };
 
     return (
@@ -397,23 +412,49 @@ const SettingsView = ({ perfil, onLogout }) => {
 
                     <div>
                         <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>Fonte do Sistema</p>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem' }}>
                             {[
-                                { id: 'font-inter', label: 'Inter (Padrão)', font: 'Inter' },
-                                { id: 'font-outfit', label: 'Outfit (Premium)', font: 'Outfit' }
+                                { id: 'font-inter', label: 'Inter', font: 'Inter' },
+                                { id: 'font-outfit', label: 'Outfit', font: 'Outfit' },
+                                { id: 'font-poppins', label: 'Poppins', font: 'Poppins' },
+                                { id: 'font-montserrat', label: 'Montserrat', font: 'Montserrat' },
+                                { id: 'font-playfair', label: 'Playfair', font: 'Playfair Display' },
+                                { id: 'font-mono', label: 'Fira Code', font: 'Fira Code' }
                             ].map(f => (
                                 <button 
                                     key={f.id} 
                                     onClick={() => applyFont(f.id)}
                                     style={{ 
-                                        padding: '1rem', borderRadius: 'var(--radius-sm)', border: fonte === f.id ? '2px solid var(--accent-color)' : '1px solid var(--glass-border)',
+                                        padding: '0.8rem', borderRadius: 'var(--radius-sm)', border: fonte === f.id ? '2px solid var(--accent-color)' : '1px solid var(--glass-border)',
                                         background: fonte === f.id ? 'rgba(14, 165, 233, 0.1)' : 'transparent', color: 'var(--text-primary)', cursor: 'pointer',
-                                        textAlign: 'left', fontFamily: f.font, fontSize: '1.1rem'
+                                        fontFamily: f.font, fontSize: '0.95rem'
                                     }}
                                 >
                                     {f.label}
                                 </button>
                             ))}
+                        </div>
+                    </div>
+
+                    <div style={{ marginTop: '2rem' }}>
+                        <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>Cores dos Quadrantes</p>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                <input type="color" value={qUrgent} onChange={(e) => applyQuadrantColor('urgent', e.target.value)} style={{ width: '40px', height: '40px', padding: 0, border: 'none', cursor: 'pointer' }} />
+                                <span style={{ fontSize: '0.85rem' }}>Fazer Agora</span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                <input type="color" value={qMedium} onChange={(e) => applyQuadrantColor('medium', e.target.value)} style={{ width: '40px', height: '40px', padding: 0, border: 'none', cursor: 'pointer' }} />
+                                <span style={{ fontSize: '0.85rem' }}>Agendar / Focar</span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                <input type="color" value={qLow} onChange={(e) => applyQuadrantColor('low', e.target.value)} style={{ width: '40px', height: '40px', padding: 0, border: 'none', cursor: 'pointer' }} />
+                                <span style={{ fontSize: '0.85rem' }}>Delegar / Depois</span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                <input type="color" value={qDone} onChange={(e) => applyQuadrantColor('done', e.target.value)} style={{ width: '40px', height: '40px', padding: 0, border: 'none', cursor: 'pointer' }} />
+                                <span style={{ fontSize: '0.85rem' }}>Concluídas</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -481,7 +522,23 @@ export default function GlassDashboard({ onNavigateToProfile, onLogout }) {
     }
   };
 
-  useEffect(() => { loadData(); }, []);
+  useEffect(() => { 
+    loadData(); 
+    // Apply saved preferences
+    const t = localStorage.getItem('zengrid_tema') || 'theme-original';
+    const f = localStorage.getItem('zengrid_fonte') || 'font-inter';
+    document.body.className = `${t} ${f}`;
+
+    // Apply quadrant colors
+    const qu = localStorage.getItem('zengrid_q_urgent') || '#ef4444';
+    const qm = localStorage.getItem('zengrid_q_medium') || '#f59e0b';
+    const ql = localStorage.getItem('zengrid_q_low') || '#10b981';
+    const qd = localStorage.getItem('zengrid_q_done') || '#0ea5e9';
+    document.documentElement.style.setProperty('--priority-urgent', qu);
+    document.documentElement.style.setProperty('--priority-medium', qm);
+    document.documentElement.style.setProperty('--priority-low', ql);
+    document.documentElement.style.setProperty('--priority-done', qd);
+  }, []);
 
   const handleSaveModal = async (taskData) => {
     try {

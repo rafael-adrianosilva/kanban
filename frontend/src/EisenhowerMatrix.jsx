@@ -1,6 +1,6 @@
 import React from 'react';
 import { updateTarefa, deleteTarefa } from './api';
-import { Check, Trash2, Edit3 } from 'lucide-react';
+import { Check, Trash2, Edit3, Move, ArrowRight } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import MeetingTimer from './MeetingTimer';
 
@@ -17,6 +17,7 @@ const TaskCardVisual = React.forwardRef(({ tarefa, index, onUpdate, onEdit, prov
   };
 
   const getPriorityColor = () => {
+    if (tarefa.status === 'concluida') return 'var(--priority-done)';
     switch(tarefa.prioridade) {
       case 'urgente': return 'var(--priority-urgent)';
       case 'media': return 'var(--priority-medium)';
@@ -25,22 +26,30 @@ const TaskCardVisual = React.forwardRef(({ tarefa, index, onUpdate, onEdit, prov
     }
   };
 
+  const [showMoveMenu, setShowMoveMenu] = React.useState(false);
+
+  const moveTask = async (novaPrioridade, novoStatus) => {
+    await updateTarefa(tarefa.id, { prioridade: novaPrioridade, status: novoStatus });
+    setShowMoveMenu(false);
+    onUpdate();
+  };
+
   return (
     <div 
       ref={ref}
       {...provided.draggableProps}
       {...provided.dragHandleProps}
-      className={snapshot.isDragging ? "" : "glass-panel task-card"}
+      className={snapshot.isDragging ? "dragging-task" : "glass-panel task-card"}
       style={{ 
         padding: '1.2rem', 
         marginBottom: '1rem', 
-        borderLeft: `4px solid ${getPriorityColor()}`,
-        opacity: tarefa.status === 'concluida' ? 0.6 : (snapshot.isDragging ? 0.95 : 1),
-        boxShadow: snapshot.isDragging ? '0 20px 40px rgba(0,0,0,0.15)' : '0 4px 15px rgba(0,0,0,0.05)',
-        background: snapshot.isDragging ? '#ffffff' : 'rgba(255, 255, 255, 0.55)',
+        borderLeft: `6px solid ${getPriorityColor()}`,
+        opacity: tarefa.status === 'concluida' && !snapshot.isDragging ? 0.6 : 1,
+        background: snapshot.isDragging ? 'var(--glass-bg)' : 'rgba(255, 255, 255, 0.55)',
         position: 'relative',
         borderRadius: 'var(--radius-md)',
-        border: snapshot.isDragging ? '1px solid var(--accent-color)' : '',
+        border: snapshot.isDragging ? '2px solid var(--accent-color)' : '1px solid transparent',
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
         ...provided.draggableProps.style
       }}
     >
@@ -78,10 +87,32 @@ const TaskCardVisual = React.forwardRef(({ tarefa, index, onUpdate, onEdit, prov
             <button onClick={toggleStatus} style={{ background: tarefa.status === 'concluida' ? 'var(--priority-low)' : 'var(--glass-bg)', border: '1px solid var(--glass-border)', color: tarefa.status === 'concluida' ? 'var(--text-inverse)' : 'var(--text-secondary)', width: '32px', height: '32px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Check size={16} />
             </button>
-            <button onClick={() => onEdit(tarefa)} style={{ background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', color: 'var(--text-secondary)', width: '32px', height: '32px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <button onClick={() => onEdit(tarefa)} title="Editar" style={{ background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', color: 'var(--text-secondary)', width: '32px', height: '32px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Edit3 size={15} />
             </button>
-            <button onClick={handleDelete} style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', color: 'var(--priority-urgent)', width: '32px', height: '32px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ position: 'relative' }}>
+                <button onClick={() => setShowMoveMenu(!showMoveMenu)} title="Mover para..." style={{ background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', color: 'var(--accent-color)', width: '32px', height: '32px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Move size={15} />
+                </button>
+                {showMoveMenu && (
+                    <div className="glass-panel" style={{ position: 'absolute', right: '40px', top: '0', zIndex: 100, width: '180px', padding: '0.5rem', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}>
+                        <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', padding: '0.4rem', fontWeight: 700, textTransform: 'uppercase' }}>Mover para:</p>
+                        <button onClick={() => moveTask('urgente', 'pendente')} style={{ width: '100%', textAlign: 'left', padding: '0.5rem', background: 'transparent', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem' }}>
+                            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--priority-urgent)' }} /> Fazer Agora
+                        </button>
+                        <button onClick={() => moveTask('media', 'pendente')} style={{ width: '100%', textAlign: 'left', padding: '0.5rem', background: 'transparent', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem' }}>
+                            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--priority-medium)' }} /> Agendar / Focar
+                        </button>
+                        <button onClick={() => moveTask('baixa', 'pendente')} style={{ width: '100%', textAlign: 'left', padding: '0.5rem', background: 'transparent', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem' }}>
+                            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--priority-low)' }} /> Delegar / Depois
+                        </button>
+                        <button onClick={() => moveTask(tarefa.prioridade, 'concluida')} style={{ width: '100%', textAlign: 'left', padding: '0.5rem', background: 'transparent', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem' }}>
+                            <Check size={14} color="var(--priority-low)" /> Concluir
+                        </button>
+                    </div>
+                )}
+            </div>
+            <button onClick={handleDelete} title="Excluir" style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', color: 'var(--priority-urgent)', width: '32px', height: '32px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Trash2 size={15} />
             </button>
         </div>
@@ -147,10 +178,11 @@ export default function EisenhowerMatrix({ tarefas, onUpdate, onEditTask }) {
         <div 
             ref={provided.innerRef} 
             {...provided.droppableProps}
-            className="glass-panel" 
+            className={`glass-panel quadrant-container ${snapshot.isDraggingOver ? 'quadrant-active' : ''}`}
             style={{ 
                 padding: '1.5rem', display: 'flex', flexDirection: 'column', height: '100%', minHeight: '400px',
-                background: snapshot.isDraggingOver ? 'rgba(255,255,255,0.6)' : 'var(--glass-bg)'
+                background: 'var(--glass-bg)',
+                ...provided.droppableProps.style
             }}
         >
           <div style={{ marginBottom: '1.5rem' }}>
@@ -182,7 +214,7 @@ export default function EisenhowerMatrix({ tarefas, onUpdate, onEditTask }) {
             <Quadrant title="Fazer Agora" desc="Alta prioridade. Impacto imediato." tasks={quadrante1} color="var(--priority-urgent)" />
             <Quadrant title="Agendar / Focar" desc="Média prioridade. Estratégico." tasks={quadrante2} color="var(--priority-medium)" />
             <Quadrant title="Delegar / Depois" desc="Baixa prioridade. Menos impacto." tasks={quadrante3} color="var(--priority-low)" />
-            <Quadrant title="Concluídas" desc="Sucesso e histórico recente." tasks={quadrante4} color="var(--accent-color)" />
+            <Quadrant title="Concluídas" desc="Sucesso e histórico recente." tasks={quadrante4} color="var(--priority-done)" />
         </div>
     </DragDropContext>
   );

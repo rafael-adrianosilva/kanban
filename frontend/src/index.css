@@ -1,5 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&display=swap');
 
 :root {
   /* System Colors - Light/Vibrant Mesh Theme */
@@ -12,10 +16,11 @@
   --accent-color: #0ea5e9; /* Crisp Cyan/Sky Blue */
   --accent-hover: #0284c7;
   
-  /* Status Colors */
+  /* Status Colors (Default Quadrant Colors) */
   --priority-urgent: #ef4444; /* Clean Red */
   --priority-medium: #f59e0b; /* Amber */
   --priority-low: #10b981; /* Emerald */
+  --priority-done: #0ea5e9; /* Sky Blue */
   
   /* Modern VisionOS Glassmorphism Tokens */
   --glass-bg: rgba(255, 255, 255, 0.45); /* Lighter, frostier */
@@ -207,6 +212,39 @@ body.theme-sakura .orb-4 { background: #fda4af; }
 
 /* Font Overrides */
 body.font-outfit { font-family: 'Outfit', sans-serif; }
+body.font-poppins { font-family: 'Poppins', sans-serif; }
+body.font-montserrat { font-family: 'Montserrat', sans-serif; }
+body.font-playfair { font-family: 'Playfair Display', serif; }
+body.font-mono { font-family: 'Fira Code', monospace; }
+
+/* Drag & Drop Visual Refinements */
+.quadrant-container {
+  transition: all 0.3s ease;
+  border: 2px dashed transparent;
+}
+
+.quadrant-active {
+  border-color: var(--accent-color);
+  background: rgba(14, 165, 233, 0.05) !important;
+  transform: scale(1.01);
+}
+
+.task-placeholder {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: var(--radius-md);
+  border: 2px dashed var(--glass-border);
+  margin-bottom: 1rem;
+}
+
+body.theme-dark .task-placeholder {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.dragging-task {
+  transform: scale(1.05) rotate(2deg) !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+  z-index: 9999 !important;
+}
 
 /* Global Responsive Fixes */
 img {
