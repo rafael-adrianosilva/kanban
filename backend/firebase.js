@@ -15,7 +15,7 @@ if (process.env.FIREBASE_SERVICE_ACCOUNT) {
   }
 }
 
-if (serviceAccount) {
+if (serviceAccount && admin.apps.length === 0) {
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount)
   });
