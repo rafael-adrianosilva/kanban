@@ -384,6 +384,16 @@ app.delete('/tarefas/:id', autenticarToken, async (req, res) => {
     }
 });
 
+// Middleware global de tratamento de erros
+app.use((err, req, res, next) => {
+    console.error('ERRO NÃO TRATADO:', err);
+    res.status(500).json({
+        erro: 'Erro interno do servidor',
+        detalhes: err.message,
+        stack: err.stack
+    });
+});
+
 if (!process.env.VERCEL) {
     app.listen(PORT, () => {
         console.log(`API Zen Grid Multi-Tag/Perfil rodando na porta ${PORT}`);
