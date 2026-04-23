@@ -3,6 +3,8 @@ import LavaLamp from './LavaLamp';
 import LoginBoard from './LoginBoard';
 import GlassDashboard from './GlassDashboard';
 import Profile from './Profile';
+import { SpeedInsights } from '@vercel/speed-insights/react';
+import { Analytics } from '@vercel/analytics/react';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -31,6 +33,8 @@ function App() {
 
   return (
     <>
+      <SpeedInsights />
+      <Analytics />
       <LavaLamp />
 
       {isAuthenticated ? (
