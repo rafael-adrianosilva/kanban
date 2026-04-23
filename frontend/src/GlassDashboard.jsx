@@ -45,7 +45,7 @@ const SidebarItem = ({ icon: Icon, label, active, onClick }) => (
 /* --- VIEWS --- */
 
 // 1. Dashboard View (Matriz)
-const DashboardView = ({ estatisticas, perfil, tarefas, categorias, loadData, setTarefaEditando, filtroPesquisa, setFiltroPesquisa, filtroCategoria, setFiltroCategoria }) => {
+const DashboardView = ({ estatisticas, perfil, tarefas, categorias, loadData, setTarefaEditando, filtroPesquisa, setFiltroPesquisa, filtroCategoria, setFiltroCategoria, animacoesAtivas }) => {
     const proximasTarefas = tarefas
         .filter(t => t.status === 'pendente' && t.data_limite)
         .sort((a, b) => new Date(a.data_limite) - new Date(b.data_limite))
@@ -105,7 +105,7 @@ const DashboardView = ({ estatisticas, perfil, tarefas, categorias, loadData, se
                 </select>
             </div>
 
-            <EisenhowerMatrix tarefas={tarefasFiltradas} onUpdate={loadData} onEditTask={setTarefaEditando} />
+            <EisenhowerMatrix tarefas={tarefasFiltradas} onUpdate={loadData} onEditTask={setTarefaEditando} animacoesAtivas={animacoesAtivas} />
         </motion.div>
     );
 };
@@ -368,7 +368,7 @@ const ChartsView = () => {
 };
 
 // 4. Configurações View
-const SettingsView = ({ perfil, onLogout }) => {
+const SettingsView = ({ perfil, onLogout, animacoesQuadrantes, applyAnimacoes }) => {
     const [email, setEmail] = useState(perfil?.email || '');
     const [senhaAtual, setSenhaAtual] = useState('');
     const [novaSenha, setNovaSenha] = useState('');
@@ -384,7 +384,6 @@ const SettingsView = ({ perfil, onLogout }) => {
     const [qMedium, setQMedium] = useState(localStorage.getItem('zengrid_q_medium') || '#f59e0b');
     const [qLow, setQLow] = useState(localStorage.getItem('zengrid_q_low') || '#10b981');
     const [qDone, setQDone] = useState(localStorage.getItem('zengrid_q_done') || '#0ea5e9');
-    const [animacoesQuadrantes, setAnimacoesQuadrantes] = useState(localStorage.getItem('zengrid_anim_quad') === 'true');
 
     const handleUpdateEmail = async (e) => {
         e.preventDefault();
@@ -434,12 +433,6 @@ const SettingsView = ({ perfil, onLogout }) => {
         if (key === 'medium') setQMedium(color);
         if (key === 'low') setQLow(color);
         if (key === 'done') setQDone(color);
-    };
-
-    const applyAnimacoes = (val) => {
-        setAnimacoesQuadrantes(val);
-        localStorage.setItem('zengrid_anim_quad', val);
-        window.dispatchEvent(new Event('storage')); // Trigger update for other components if needed
     };
 
     return (
@@ -701,6 +694,13 @@ export default function GlassDashboard({ onNavigateToProfile, onLogout }) {
     } catch (e) { console.error("Erro ao carregar perfil:", e); }
   };
 
+  const [animacoesQuadrantes, setAnimacoesQuadrantes] = useState(localStorage.getItem('zengrid_anim_quad') === 'true');
+
+  const applyAnimacoes = (val) => {
+    setAnimacoesQuadrantes(val);
+    localStorage.setItem('zengrid_anim_quad', val);
+  };
+
   const loadData = async () => {
     try {
       const [stats, tasks, dataPerfil, cats] = await Promise.all([ 
@@ -829,6 +829,7 @@ export default function GlassDashboard({ onNavigateToProfile, onLogout }) {
                         loadData={loadData} setTarefaEditando={setTarefaEditando}
                         filtroPesquisa={filtroPesquisa} setFiltroPesquisa={setFiltroPesquisa}
                         filtroCategoria={filtroCategoria} setFiltroCategoria={setFiltroCategoria}
+                        animacoesAtivas={animacoesQuadrantes}
                     />
                 )}
                 {activeView === 'tasks' && (
@@ -849,7 +850,14 @@ export default function GlassDashboard({ onNavigateToProfile, onLogout }) {
                     />
                 )}
                 {activeView === 'settings' && (
-                    <SettingsView key="v-sett" perfil={perfil} onLogout={onLogout} />
+                    <SettingsView 
+                        key="v-sett" 
+                        perfil={perfil} 
+                        onLogout={onLogout} 
+                        animacoesQuadrantes={animacoesQuadrantes}
+                        setAnimacoesQuadrantes={setAnimacoesQuadrantes}
+                        applyAnimacoes={applyAnimacoes}
+                    />
                 )}
             </AnimatePresence>
 

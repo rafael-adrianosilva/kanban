@@ -155,7 +155,7 @@ function TaskCard({ tarefa, onUpdate, onEdit, index }) {
   );
 }
 
-export default function EisenhowerMatrix({ tarefas: tarefasProp, onUpdate, onEditTask }) {
+export default function EisenhowerMatrix({ tarefas: tarefasProp, onUpdate, onEditTask, animacoesAtivas }) {
   const [tarefas, setTarefas] = React.useState(tarefasProp);
 
   // Sincroniza o estado local quando as tarefas vindas do pai mudam
@@ -215,7 +215,7 @@ export default function EisenhowerMatrix({ tarefas: tarefasProp, onUpdate, onEdi
       });
   };
 
-  const animacoesAtivas = localStorage.getItem('zengrid_anim_quad') === 'true';
+  // Agora usa a prop vinda do GlassDashboard
 
   const Quadrant = ({ title, desc, tasks, color }) => (
     <Droppable droppableId={title}>
@@ -229,7 +229,16 @@ export default function EisenhowerMatrix({ tarefas: tarefasProp, onUpdate, onEdi
                 ...provided.droppableProps.style
             }}
         >
-          <div style={{ marginBottom: '1.5rem' }}>
+          {/* Lava Lamp Effect Blobs */}
+          {animacoesAtivas && (
+            <div className="lava-lamp-container">
+              <div className="lava-blob" style={{ '--blob-color': color, '--duration': '15s', width: '150px', height: '150px', top: '-20px', left: '-20px' }}></div>
+              <div className="lava-blob" style={{ '--blob-color': color, '--duration': '20s', width: '200px', height: '200px', bottom: '-40px', right: '-40px' }}></div>
+              <div className="lava-blob" style={{ '--blob-color': color, '--duration': '18s', width: '120px', height: '120px', top: '40%', left: '30%' }}></div>
+            </div>
+          )}
+
+          <div style={{ marginBottom: '1.5rem', position: 'relative', zIndex: 1 }}>
             <h3 style={{ color: color, display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.2rem', fontWeight: 600 }}>
               <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: color, boxShadow: `0 0 10px ${color}` }} />
               {title}
@@ -239,7 +248,7 @@ export default function EisenhowerMatrix({ tarefas: tarefasProp, onUpdate, onEdi
           <div 
               ref={provided.innerRef} 
               {...provided.droppableProps}
-              style={{ flex: 1, minHeight: '100px', overflow: 'visible' }}
+              style={{ flex: 1, minHeight: '100px', overflow: 'visible', position: 'relative', zIndex: 1 }}
           >
               {tasks.map((t, idx) => (
                 <TaskCard key={t.id.toString()} index={idx} tarefa={t} onUpdate={onUpdate} onEdit={onEditTask} />

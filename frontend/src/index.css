@@ -39,6 +39,35 @@
   --radius-sm: 12px;
 }
 
+/* Lava Lamp Effect */
+.lava-lamp-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.lava-blob {
+  position: absolute;
+  background: var(--blob-color, var(--accent-color));
+  filter: blur(40px);
+  border-radius: 50%;
+  opacity: 0.15;
+  animation: lava-move var(--duration, 10s) infinite alternate ease-in-out;
+}
+
+@keyframes lava-move {
+  0% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(10%, 20%) scale(1.2); }
+  66% { transform: translate(-10%, 15%) scale(0.9); }
+  100% { transform: translate(5%, -10%) scale(1.1); }
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
